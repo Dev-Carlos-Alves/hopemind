@@ -1,0 +1,210 @@
+/* Variáveis CSS para cores e tamanhos */
+:root {
+    --splash-background: #F5F3EF;
+    --splash-green-circle: #D4F4D3;
+    --splash-button-green: #6FCF97;
+    --splash-button-hover: #5cb87c;
+    --text-dark: #333333;
+    --text-medium: #666666;
+    --safe-mind-orange: #F2994A;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    color: var(--text-dark);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body.splash-screen {
+    background-color: var(--splash-background);
+}
+
+.app-container {
+    max-width: 450px;
+    margin: 0 auto;
+    background-color: #FFFFFF;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Cabeçalho da Barra de Status */
+.status-bar {
+    width: 100%;
+    padding: 10px 20px;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+.status-bar .status-icons-full {
+    width: 90%;
+    max-width: 300px;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Elementos decorativos do topo */
+.splash-top-decoration {
+    position: absolute;
+    top: -80px;
+    left: -80px;
+    width: 200px;
+    height: 200px;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.splash-top-decoration .circle-large {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 150px;
+    height: 150px;
+    background-color: var(--splash-green-circle);
+    border-radius: 50%;
+    opacity: 0.7;
+}
+
+.splash-top-decoration .circle-small {
+    position: absolute;
+    top: 80px;
+    left: 80px;
+    width: 80px;
+    height: 80px;
+    background-color: var(--splash-green-circle);
+    border-radius: 50%;
+    opacity: 0.5;
+}
+
+/* Wrapper para o conteúdo principal da splash */
+.splash-content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    z-index: 5;
+    padding-top: 50px;
+}
+
+/* Botão "Iniciar" */
+.splash-action {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.btn-primary-splash {
+    display: block;
+    width: 100%;
+    max-width: 250px;
+    padding: 15px 30px;
+    background-color: var(--splash-button-green);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* --- Novos estilos para a Splash Screen 2 (splash2.html) --- */
+
+/* Estilos para a ilustração da Splash 2 */
+.splash-illustration-section {
+    margin-top: 50px;
+    margin-bottom: 40px;
+}
+
+.splash-illustration-section .illustration-splash2 {
+    max-width: 280px;
+    height: auto;
+    display: block;
+    margin-top: 120px;
+}
+
+/* Estilos para o texto da Splash 2 */
+.splash-text-content {
+    padding: 0 30px;
+    margin-bottom: 30px;
+}
+
+.splash-text-content .splash-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 15px;
+}
+
+.splash-text-content .splash-subtitle {
+    font-size: 16px;
+    color: var(--text-medium);
+    line-height: 1.5;
+}
+
+/* Estilos para os indicadores de paginação */
+.pagination-dots {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: auto;
+    flex-grow: 1;
+    align-items: flex-end;
+    padding-bottom: 30px;
+}
+
+.pagination-dots .dot {
+    width: 10px;
+    height: 10px;
+    background-color: var(--text-light);
+    border-radius: 50%;
+    transition: background-color 0.3s ease, width 0.3s ease;
+}
+
+.pagination-dots .dot.active {
+    width: 25px;
+    background-color: var(--splash-button-green);
+    border-radius: 5px;
+}
+
+/* --- Ajustes para Media Queries --- */
+@media (max-width: 375px) {
+    .splash-illustration-section .illustration-splash2 {
+        max-width: 250px;
+    }
+    .splash-text-content {
+        padding: 0 20px;
+    }
+    .splash-text-content .splash-title {
+        font-size: 22px;
+    }
+    .splash-text-content .splash-subtitle {
+        font-size: 15px;
+    }
+    .pagination-dots {
+        padding-bottom: 25px;
+    }
+    .pagination-dots .dot {
+        width: 8px;
+        height: 8px;
+    }
+    .pagination-dots .dot.active {
+        width: 20px;
+    }
+}

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HopeMind - Triagem Inteligente</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <style>
+        .triage-container {
+            max-width: 800px;
+            margin: 3rem auto;
+        }
+        .question-block {
+            margin-bottom: 2.5rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #eee;
+        }
+        .question-block:last-child {
+            border-bottom: none;
+        }
+        .question-title {
+            font-size: 1.25rem;
+            margin-bottom: 1.2rem;
+            color: var(--color-text-main);
+            font-weight: 600;
+        }
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            transition: all 0.2s ease;
+        }
+        .option-label:hover {
+            background-color: var(--color-bg);
+            border-color: var(--color-primary);
+        }
+        .option-label input[type="radio"],
+        .option-label input[type="checkbox"] {
+            transform: scale(1.2);
+            accent-color: var(--color-accent-1);
+        }
+        .alert-error {
+            background-color: #fdeaea;
+            color: var(--color-error);
+            border: 1px solid #fad2d2;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card triage-container">
+            <h2 style="text-align: center; font-size: 2rem;">Triagem Inteligente</h2>
+            <p style="color: var(--color-text-muted); text-align: center; margin-bottom: 3rem;">
+                Responda às perguntas abaixo com sinceridade para que nossa IA conecte você ao profissional mais adequado.
+            </p>
+            
+            <div id="error-message" class="hidden alert-error"></div>
+            
+            <form id="triage-form">
+                <div id="questions-container">
+                    <div style="text-align: center; padding: 3rem; color: var(--color-text-muted);">
+                        Carregando questionário...
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn" id="submit-triage" style="width: 100%; padding: 1rem; font-size: 1.1rem; display: none;">
+                    Finalizar e Ver Resultados
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <script type="module" src="../js/triage.js"></script>
+</body>
+</html>

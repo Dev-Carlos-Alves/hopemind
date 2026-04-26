@@ -1,0 +1,263 @@
+/* Termo Geral */
+
+:root {
+    --splash-background: #F5F3EF;
+    --splash-green-circle: #D4F4D3;
+    --splash-button-green: #6FCF97;
+    --splash-button-hover: #5cb87c;
+    --text-dark: #333333;
+    --text-medium: #666666;
+    --safe-mind-orange: #F2994A;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    color: var(--text-dark);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body.splash-screen {
+    background-color: var(--splash-background);
+}
+
+.app-container {
+    max-width: 450px;
+    margin: 0 auto;
+    background-color: #FFFFFF;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.status-bar {
+    width: 100%;
+    padding: 10px 20px;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+.status-bar .status-icons-full {
+    width: 90%;
+    max-width: 300px;
+    height: auto;
+    object-fit: contain;
+}
+
+.splash-top-decoration {
+    position: absolute;
+    top: -80px;
+    left: -80px;
+    width: 200px;
+    height: 200px;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.splash-top-decoration .circle-large {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 150px;
+    height: 150px;
+    background-color: var(--splash-green-circle);
+    border-radius: 50%;
+    opacity: 0.7;
+}
+
+.splash-top-decoration .circle-small {
+    position: absolute;
+    top: 80px;
+    left: 80px;
+    width: 80px;
+    height: 80px;
+    background-color: var(--splash-green-circle);
+    border-radius: 50%;
+    opacity: 0.5;
+}
+
+.splash-content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    z-index: 5;
+    padding-top: 50px;
+}
+
+.btn-primary-splash {
+    display: block;
+    width: 100%;
+    max-width: 250px;
+    padding: 15px 30px;
+    background-color: var(--splash-button-green);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-align: center;
+}
+
+/* cadastro */
+
+/* --- Novos estilos para a Tela de Cadastro (registration.html) --- */
+
+/* Wrapper principal do conteúdo de Cadastro */
+.registration-content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+    padding-top: 50px;
+    padding-bottom: 20px;
+    justify-content: flex-start;
+    gap: 15px;
+}
+
+/* Logo da página de Cadastro */
+.registration-content-wrapper .registration-logo {
+    max-width: 200px;
+    height: auto;
+    margin-bottom: 0;
+}
+
+/* Título da página de Cadastro */
+.registration-content-wrapper .registration-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0;
+}
+
+/* Subtítulo da página de Cadastro */
+.registration-content-wrapper .registration-subtitle {
+    font-size: 15px;
+    color: var(--text-medium);
+    line-height: 1.5;
+    margin-bottom: 0;
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Estilos para o formulário de Cadastro */
+.registration-form {
+    width: 100%;
+    max-width: 300px;
+    margin-top: 0;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+}
+
+/* Grupo de campos */
+.registration-form .form-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 0;
+}
+
+/* Botão "CADASTRAR" */
+.registration-form .btn-register-action {
+    margin-top: 10px;
+    margin-bottom: 0;
+}
+
+/* Link "Voltar para Login" */
+.back-to-login-link {
+    margin-top: 20px;
+    font-size: 15px;
+    margin-bottom: 20px;
+}
+
+/* --- Media Queries para a Tela de Cadastro (registration.html) --- */
+@media (max-width: 375px) {
+    .registration-content-wrapper {
+        padding-top: 30px;
+        gap: 10px;
+    }
+    .registration-content-wrapper .registration-logo {
+        max-width: 150px;
+    }
+    .registration-content-wrapper .registration-title {
+        font-size: 26px;
+    }
+    .registration-content-wrapper .registration-subtitle {
+        font-size: 14px;
+        max-width: 250px;
+    }
+    .registration-form {
+        max-width: 280px;
+        gap: 15px;
+    }
+    .registration-form .btn-register-action {
+        margin-top: 8px;
+    }
+    .back-to-login-link {
+        font-size: 13px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+}
+
+/* Formas das Respostas*/
+.form-label {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+    margin-top: 0;
+    text-align: center;
+    width: 100%;
+}
+
+.form-input {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    font-size: 17px;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    text-align: center;
+}
+
+.form-input::placeholder {
+    color: var(--text-light);
+}
+
+.form-input:focus {
+    border-color: var(--splash-button-green);
+}

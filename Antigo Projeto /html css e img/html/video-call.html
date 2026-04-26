@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hopemind - Video Chamada</title>
+    <link rel="stylesheet" href="css/styles-video-call.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="video-call-screen">
+
+    <div class="app-container video-call-container">
+        <header class="call-header">
+            <a href="doctor-profile.html" class="icon-button back-button" aria-label="Voltar">
+                <span class="material-icons">arrow_back</span>
+            </a>
+            <div class="call-info">
+                <h1 class="doctor-name-call">Rafael Moura</h1>
+                <p class="call-duration">11:03 min</p>
+            </div>
+            <button class="icon-button menu-button" aria-label="Mais opções">
+                <span class="material-icons">more_vert</span>
+            </button>
+        </header>
+
+        <main class="video-display-area">
+            <img src="img/psicologo-rafael.png" alt="Vídeo do Dr. Rafael Moura" class="main-video-stream">
+            <div class="user-video-wrapper">
+                <img src="img/moldura-paciente.png" alt="Sua câmera" class="user-video-stream">
+            </div>
+        </main>
+
+        <footer class="call-controls">
+			<button class="control-button" aria-label="Desativar microfone">
+				<span class="material-icons">mic_off</span>
+			</button>
+			<button class="control-button" aria-label="Desativar câmera">
+				<span class="material-icons">videocam_off</span>
+			</button>
+			<a href="chat.html" class="control-button" aria-label="Abrir chat">
+				<span class="material-icons">chat</span>
+			</a>
+			<a href="doctor-profile.html" class="control-button end-call-button" aria-label="Encerrar chamada">
+				<span class="material-icons">call_end</span>
+			</a>
+		</footer>
+    </div>
+
+</body>
+</html>

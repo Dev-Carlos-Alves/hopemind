@@ -1,0 +1,179 @@
+/* Termo Geral */
+
+:root {
+    --splash-background: #F5F3EF;
+    --splash-green-circle: #D4F4D3;
+    --splash-button-green: #6FCF97;
+    --splash-button-hover: #5cb87c;
+    --text-dark: #333333;
+    --text-medium: #666666;
+    --safe-mind-orange: #F2994A;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    color: var(--text-dark);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body.splash-screen {
+    background-color: var(--splash-background);
+}
+
+.app-container {
+    max-width: 450px;
+    margin: 0 auto;
+    background-color: #FFFFFF;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.status-bar {
+    width: 100%;
+    padding: 10px 20px;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+.status-bar .status-icons-full {
+    width: 90%;
+    max-width: 300px;
+    height: auto;
+    object-fit: contain;
+}
+
+.splash-top-decoration {
+    position: absolute;
+    top: -80px;
+    left: -80px;
+    width: 200px;
+    height: 200px;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.splash-top-decoration .circle-large {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 150px;
+    height: 150px;
+    background-color: var(--splash-green-circle);
+    border-radius: 50%;
+    opacity: 0.7;
+}
+
+.splash-top-decoration .circle-small {
+    position: absolute;
+    top: 80px;
+    left: 80px;
+    width: 80px;
+    height: 80px;
+    background-color: var(--splash-green-circle);
+    border-radius: 50%;
+    opacity: 0.5;
+}
+
+.splash-content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    z-index: 5;
+    padding-top: 50px;
+}
+
+/* Botão "Iniciar" */
+.splash-action {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.btn-primary-splash {
+    display: block;
+    width: 100%;
+    max-width: 250px;
+    padding: 15px 30px;
+    background-color: var(--splash-button-green);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* --- Novos estilos para a Splash Screen 3 (splash3.html) --- */
+
+.splash-illustration-section .illustration-splash3 {
+    max-width: 280px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.splash-text-content {
+    margin-bottom: 25px;
+}
+
+.pagination-dots .dot:nth-child(3) {
+    background-color: var(--splash-button-green);
+    width: 25px;
+    border-radius: 5px;
+}
+
+.pagination-dots .dot:nth-child(1),
+.pagination-dots .dot:nth-child(2) {
+    background-color: var(--text-light);
+    width: 10px;
+    border-radius: 50%;
+}
+
+.professional-link-section {
+    margin-top: 25px;
+    margin-bottom: 30px;
+    font-size: 14px;
+    color: var(--text-medium);
+    text-align: center;
+}
+
+.professional-link-section p {
+    margin-bottom: 5px;
+}
+
+.professional-link-section .link-professional {
+    color: var(--splash-button-green);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.professional-link-section .link-professional:hover {
+    color: var(--splash-button-hover);
+    text-decoration: underline;
+}

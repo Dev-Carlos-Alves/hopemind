@@ -1,0 +1,512 @@
+/* welcome*/
+/* Variáveis globais (mantidas do seu original) */
+:root {
+    --primary-green: #D8F2E2;
+    --secondary-green: #A3E4D7;
+    --hopemind-green-dark: #3F9A43;
+    --hopemind-green-light: #67C584;
+    --app-main-background: #FFFFFF;
+    --body-background-color: #F8F8F8;
+    --text-dark: #333333;
+    --text-medium: #666666;
+    --text-light: #999999;
+    --splash-button-green: #3F9A43;
+    --bottom-nav-bg: #4F7061;
+    --star-color: #FFD700;
+}
+
+/* Estilos Globais e Reset (mantidos do seu original) */
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--body-background-color);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    overflow-y: auto;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 450px;
+    height: 100vh;
+    background-color: var(--app-main-background);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Barra de Status */
+.status-bar-container {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 450px;
+    display: flex;
+    justify-content: center;
+    z-index: 20;
+    padding: 10px 0;
+    box-sizing: border-box;
+}
+
+.status-bar-container .status-icons-full {
+    width: 90%;
+    max-width: 300px;
+    height: auto;
+    display: block;
+}
+
+/* Removendo estilos antigos da barra de status que não serão mais usados */
+.status-bar,
+.status-bar .status-left,
+.status-bar .status-time,
+.status-bar .status-right,
+.status-bar .status-icon {
+    display: none !important;
+}
+
+/* Seção de Boas-Vindas com Avatar */
+.welcome-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    background: linear-gradient(to bottom, var(--primary-green), var(--secondary-green));
+    border-bottom-left-radius: 40px;
+    border-bottom-right-radius: 40px;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    z-index: 5;
+    min-height: 150px;
+    padding-top: 50px;
+    box-sizing: border-box;
+}
+
+.welcome-header .welcome-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 10px 20px 25px;
+    box-sizing: border-box;
+    margin-top: 0;
+}
+
+.welcome-header .welcome-text {
+    color: var(--text-dark);
+    flex-grow: 1;
+    text-align: left;
+    margin-left: 10px;
+}
+
+.welcome-header .greeting {
+    font-size: 16px;
+    font-weight: 400;
+    display: block;
+    color: var(--text-dark);
+}
+
+.welcome-header .user-name {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.welcome-header .user-avatar-container {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #FFFFFF;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+    margin-left: 15px;
+}
+
+.welcome-header .user-avatar-container .user-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.welcome-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    padding: 0 20px;
+    position: relative;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    z-index: 1;
+    height: calc(100vh - 175px - 70px);
+    box-sizing: border-box;
+}
+
+/* Seção da Barra de Busca */
+.search-bar-section {
+    margin-top: 30px;
+    position: relative;
+    z-index: 10;
+    margin-bottom: 20px;
+}
+
+.search-input-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: var(--app-main-background);
+    border-radius: 30px;
+    padding: 10px 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.search-input-wrapper .search-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.search-input-wrapper .search-input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    padding: 5px 0;
+    color: var(--text-dark);
+}
+
+.search-input-wrapper .search-input::placeholder {
+    color: var(--text-light);
+}
+
+.search-input-wrapper .filter-icon {
+    width: 20px;
+    height: 20px;
+    margin-left: 10px;
+    flex-shrink: 0;
+}
+
+/* Seção de Categorias de Profissionais (Abas) */
+.professional-categories {
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+.categories-nav {
+    display: flex;
+    justify-content: space-around;
+    border-bottom: 1px solid #E0E0E0;
+    padding-bottom: 10px;
+}
+
+.categories-nav .category-item {
+    text-decoration: none;
+    color: var(--text-medium);
+    font-weight: 600;
+    padding: 5px 10px;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.categories-nav .category-item.active {
+    color: var(--splash-button-green);
+}
+
+.categories-nav .category-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -11px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 20px);
+    height: 3px;
+    background-color: var(--splash-button-green);
+    border-radius: 2px;
+}
+
+/* Seção de Cards de Profissionais (Horizontal Scroll) */
+.professional-cards-section {
+    margin-top: 10px;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 15px;
+    -webkit-overflow-scrolling: touch;
+    margin-left: -20px;
+    margin-right: -20px;
+    margin-bottom: 98px;
+}
+
+.professional-cards-container {
+    display: flex;
+    gap: 20px;
+    padding: 0 20px;
+}
+
+/* Estilos para o novo layout de cards de profissionais */
+.professional-card {
+    flex-shrink: 0;
+    width: 200px;
+    background-color: var(--app-main-background);
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+.professional-image-wrapper {
+    width: 100%;
+    height: 150px;
+    overflow: hidden;
+    background-color: #A3E4D7;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    position: relative;
+}
+
+.professional-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    object-position: top;
+}
+
+.professional-details {
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-grow: 1;
+}
+
+.professional-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 0 0 5px 0;
+}
+
+.professional-title {
+    font-size: 0.9rem;
+    color: var(--text-medium);
+    margin: 0 0 10px 0;
+}
+
+.rating-and-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: auto;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+}
+
+.star-icon {
+    color: var(--star-color);
+    font-size: 18px;
+    margin-right: 2px;
+}
+
+.profile-link {
+    background-color: var(--splash-button-green);
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.arrow-icon {
+    width: 18px;
+    height: 18px;
+    filter: brightness(0) invert(1);
+}
+
+/* Seção "Como está se sentindo hoje?" */
+.how-are-you-feeling {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: var(--hopemind-green-light);
+    margin-left: -20px;
+    margin-right: -20px;
+    padding-bottom: 20px;
+    border-top-left-radius: 40px;
+    border-top-right-radius: 40px;
+    color: #FFFFFF;
+    position: relative;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    margin-bottom: 0;
+    overflow: hidden;
+}
+
+.how-are-you-feeling h2 {
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Estilo para a imagem de sentimentos completa (sentimentos.png) */
+.feeling-options-grid,
+.feeling-item,
+.feeling-item img,
+.feeling-item span {
+    display: none !important;
+}
+
+.how-are-you-feeling .feelings-full-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    z-index: 1;
+    margin-bottom: 20px;
+    object-fit: contain;
+}
+
+/* Barra de Navegação Inferior */
+.bottom-nav {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--bottom-nav-bg);
+    display: flex;
+    justify-content: space-around;
+    padding: 20px 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    flex-shrink: 0;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    transition: color 0.3s ease;
+}
+
+.nav-item .material-icons {
+    font-size: 28px;
+    margin-bottom: 3px;
+}
+
+.nav-item.active {
+    color: white;
+}
+
+.nav-item:hover {
+    color: white;
+}
+
+/* --- Media Queries para a Welcome Screen --- */
+@media (max-width: 375px) {
+    .welcome-content-wrapper {
+        padding: 0 15px;
+        height: calc(100vh - 165px - 60px);
+    }
+    .welcome-header {
+        min-height: 130px;
+        padding-top: 40px;
+    }
+    .welcome-header .welcome-content {
+        padding: 10px 15px 20px;
+    }
+    .welcome-header .greeting {
+        font-size: 14px;
+    }
+    .welcome-header .user-name {
+        font-size: 20px;
+    }
+    .welcome-header .user-avatar-container {
+        width: 50px;
+        height: 50px;
+    }
+    .status-bar-container {
+        padding: 8px 0;
+    }
+    .status-bar-container .status-icons-full {
+        width: 90%;
+        max-width: 250px;
+    }
+    .search-bar-section {
+        margin-top: -25px;
+        margin-bottom: 10px;
+    }
+    .professional-categories {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    .professional-cards-section {
+        margin-top: 10px;
+    }
+    .professional-cards-container {
+        padding: 0 15px;
+        gap: 15px;
+    }
+    .professional-card {
+        width: 180px;
+    }
+    .professional-image-wrapper {
+        height: 130px;
+    }
+    .professional-details {
+        padding: 10px 15px;
+    }
+    .professional-name {
+        font-size: 1rem;
+    }
+    .professional-title {
+        font-size: 0.8rem;
+    }
+    .star-icon {
+        font-size: 16px;
+    }
+    .profile-link {
+        width: 30px;
+        height: 30px;
+    }
+    .arrow-icon {
+        width: 16px;
+        height: 16px;
+    }
+    .how-are-you-feeling {
+        margin-top: 15px;
+        padding-bottom: 15px;
+    }
+    .how-are-you-feeling h2 {
+        font-size: 16px;
+    }
+    .bottom-nav {
+        padding: 10px 0;
+        height: 60px;
+    }
+    .nav-item .material-icons {
+        font-size: 24px;
+    }
+}

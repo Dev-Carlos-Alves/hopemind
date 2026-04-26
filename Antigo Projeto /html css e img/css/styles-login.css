@@ -1,0 +1,382 @@
+/* Termo Geral */
+
+:root {
+    --splash-background: #F5F3EF;
+    --splash-green-circle: #D4F4D3;
+    --splash-button-green: #6FCF97;
+    --splash-button-hover: #5cb87c;
+    --text-dark: #333333;
+    --text-medium: #666666;
+    --safe-mind-orange: #F2994A;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    color: var(--text-dark);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body.splash-screen {
+    background-color: var(--splash-background);
+}
+
+.app-container {
+    max-width: 450px;
+    margin: 0 auto;
+    background-color: #FFFFFF;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.status-bar {
+    width: 100%;
+    padding: 10px 20px;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+.status-bar .status-icons-full {
+    width: 90%;
+    max-width: 300px;
+    height: auto;
+    object-fit: contain;
+}
+
+.splash-top-decoration {
+    position: absolute;
+    top: -80px;
+    left: -80px;
+    width: 200px;
+    height: 200px;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.splash-top-decoration .circle-large {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 150px;
+    height: 150px;
+    background-color: var(--splash-green-circle);
+    border-radius: 50%;
+    opacity: 0.7;
+}
+
+.splash-top-decoration .circle-small {
+    position: absolute;
+    top: 80px;
+    left: 80px;
+    width: 80px;
+    height: 80px;
+    background-color: var(--splash-green-circle);
+    border-radius: 50%;
+    opacity: 0.5;
+}
+
+.splash-content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    z-index: 5;
+    padding-top: 50px;
+}
+
+.btn-primary-splash {
+    display: block;
+    width: 100%;
+    max-width: 250px;
+    padding: 15px 30px;
+    background-color: var(--splash-button-green);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+	text-align: center;
+}
+
+/* Login Screen */
+
+.login-content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+    padding-top: 50px;
+    padding-bottom: 20px;
+    justify-content: center;
+}
+
+.login-content-wrapper .login-logo {
+    max-width: 200px;
+    height: auto;
+    margin-bottom: 40px;
+}
+
+.login-content-wrapper .login-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 30px;
+}
+
+.login-form {
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.login-form .form-label {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+    margin-top: 15px;
+}
+
+.login-form .form-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    font-size: 16px;
+    color: var(--text-dark);
+    margin-bottom: 15px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.login-form .form-input::placeholder {
+    color: var(--text-light);
+}
+
+.login-form .form-input:focus {
+    border-color: var(--splash-button-green);
+}
+
+.login-form .btn-login-action {
+    margin-top: 15px;
+    margin-bottom: 20px;
+	text-align: center;
+	
+}
+
+.login-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    margin-bottom: 40px;
+}
+
+.login-links .link-forgot-password,
+.login-links .link-register {
+    color: var(--text-medium);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.login-links .link-forgot-password:hover,
+.login-links .link-register:hover {
+    color: var(--splash-button-green);
+    text-decoration: underline;
+}
+
+.login-links .link-separator {
+    color: var(--text-light);
+    margin: 0 10px;
+}
+
+.social-login-buttons {
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 20px;
+}
+
+.btn-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 20px;
+    background-color: #FFFFFF;
+    color: var(--text-dark);
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-bottom: 15px;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    border: 2px solid;
+}
+
+.btn-social:hover {
+    background-color: #F8F8F8;
+}
+
+/* Estilos específicos para a Borda e Cor do texto para cada botão social */
+
+/* Google */
+.btn-social-google-colored {
+    border-color: var(--google-border-color);
+}
+.btn-social-google-colored:hover {
+    border-color: var(--google-border-color);
+}
+
+/* Facebook */
+.btn-social-facebook-colored {
+    border-color: var(--facebook-border-color);
+}
+.btn-social-facebook-colored:hover {
+    border-color: var(--facebook-border-color);
+}
+
+/* Gov.br */
+.btn-social-govbr-colored {
+    border-color: var(--govbr-border-color);
+}
+.btn-social-govbr-colored:hover {
+    border-color: var(--govbr-border-color);
+}
+
+/* Estilos para os ícones sociais dentro desses botões */
+.btn-social .icon-social {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+/* --- Media Queries Gerais --- */
+@media (max-width: 375px) {
+    /* Media Queries para Splash 1 */
+    .splash-top-decoration {
+        top: -70px;
+        left: -70px;
+    }
+    .splash-top-decoration .circle-large {
+        width: 130px;
+        height: 130px;
+    }
+    .splash-top-decoration .circle-small {
+        top: 70px;
+        left: 70px;
+        width: 70px;
+        height: 70px;
+    }
+    .hopemind-logo-full {
+        max-width: 220px;
+        margin-bottom: 40px;
+    }
+    .safe-mind-logo {
+        max-width: 100px;
+    }
+    .btn-primary-splash {
+        font-size: 16px;
+        padding: 12px 25px;
+    }
+    .status-bar .status-icons-full {
+        height: 16px;
+    }
+
+    /* Media Queries para Splash 2/3 */
+    .splash-illustration-section .illustration-splash2,
+    .splash-illustration-section .illustration-splash3 {
+        max-width: 250px;
+    }
+    .splash-text-content {
+        padding: 0 20px;
+    }
+    .splash-text-content .splash-title {
+        font-size: 22px;
+    }
+    .splash-text-content .splash-subtitle {
+        font-size: 15px;
+    }
+    .pagination-dots {
+        padding-bottom: 25px;
+    }
+    .pagination-dots .dot {
+        width: 8px;
+        height: 8px;
+    }
+    .pagination-dots .dot.active {
+        width: 20px;
+    }
+    .professional-link-section {
+        margin-top: 20px;
+        margin-bottom: 25px;
+        font-size: 13px;
+    }
+
+    /* Media Queries para a Tela de Login */
+    .login-content-wrapper {
+        padding-top: 30px;
+    }
+    .login-content-wrapper .login-logo {
+        max-width: 150px;
+        margin-bottom: 30px;
+    }
+    .login-content-wrapper .login-title {
+        font-size: 28px;
+        margin-bottom: 25px;
+    }
+    .login-form {
+        max-width: 280px;
+    }
+    .login-form .form-label {
+        font-size: 15px;
+    }
+    .login-form .form-input {
+        padding: 10px 12px;
+        font-size: 15px;
+    }
+    .login-links {
+        font-size: 13px;
+        margin-bottom: 30px;
+    }
+    .social-login-buttons {
+        max-width: 280px;
+    }
+    .btn-social {
+        padding: 10px 15px;
+        font-size: 15px;
+    }
+    .icon-social {
+        width: 20px;
+        height: 20px;
+    }
+}

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HopeMind - Login & Cadastro</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .auth-card {
+            width: 100%;
+            max-width: 480px;
+        }
+        .logo-box {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .logo-box img {
+            max-width: 240px;
+            height: auto;
+        }
+        .toggle-text {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.95rem;
+            color: var(--color-text-muted);
+        }
+        .toggle-text a {
+            color: var(--color-accent-1);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .toggle-text a:hover {
+            text-decoration: underline;
+        }
+        #alert-box {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            text-align: center;
+        }
+        .alert-error {
+            background-color: #fdeaea;
+            color: var(--color-error);
+            border: 1px solid #fad2d2;
+        }
+        .alert-success {
+            background-color: var(--color-primary-light);
+            color: var(--color-accent-1);
+            border: 1px solid var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        <div class="card auth-card">
+            
+            <div class="logo-box">
+                <img src="/assets/images/logo-hopemind-full.png" alt="HopeMind Logo" onerror="this.src='https://placehold.co/400x120/D8F2E2/3F9A43?text=HopeMind'">
+            </div>
+
+            <div id="alert-box" class="hidden"></div>
+
+            <!-- Login View -->
+            <form id="form-login">
+                <h2>Acesse sua Conta</h2>
+                <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">Bem-vindo de volta à plataforma HopeMind.</p>
+                
+                <div class="form-group">
+                    <label for="login-email">E-mail</label>
+                    <input type="email" id="login-email" placeholder="seu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-senha">Senha</label>
+                    <input type="password" id="login-senha" placeholder="••••••••" required>
+                </div>
+                
+                <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;">Entrar</button>
+                
+                <div class="toggle-text">
+                    Ainda não tem conta? <a href="#" id="toggle-to-register">Cadastre-se aqui</a>
+                </div>
+            </form>
+
+            <!-- Register View -->
+            <form id="form-register" class="hidden">
+                <h2>Criar Conta</h2>
+                <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">Faça parte da nossa rede de apoio mental.</p>
+                
+                <div class="form-group">
+                    <label for="reg-tipo">O que você busca?</label>
+                    <select id="reg-tipo" required>
+                        <option value="Paciente">Sou Paciente (Buscando Ajuda)</option>
+                        <option value="Psicologo">Sou Psicólogo (Oferecendo Ajuda)</option>
+                    </select>
+                </div>
+
+                <!-- Campos Globais -->
+                <div class="form-group">
+                    <label for="reg-nome">Nome Completo</label>
+                    <input type="text" id="reg-nome" placeholder="Seu nome" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reg-email">E-mail</label>
+                    <input type="email" id="reg-email" placeholder="seu@email.com" required>
+                </div>
+
+                <div class="form-group" style="display: flex; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <label for="reg-cpf">CPF</label>
+                        <input type="text" id="reg-cpf" placeholder="Apenas números" pattern="[0-9]{11}" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="reg-telefone">Telefone</label>
+                        <input type="text" id="reg-telefone" placeholder="(11) 99999-9999" required>
+                    </div>
+                </div>
+
+                <div class="form-group" style="display: flex; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <label for="reg-nascimento">Data de Nascimento</label>
+                        <input type="date" id="reg-nascimento" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="reg-genero">Gênero</label>
+                        <select id="reg-genero" required>
+                            <option value="">Selecione...</option>
+                            <option value="Homem">Homem</option>
+                            <option value="Mulher">Mulher</option>
+                            <option value="LGBTQIAP+">Não-Binário / LGBTQIAP+</option>
+                            <option value="Indiferente">Prefiro não dizer</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reg-senha">Senha</label>
+                    <input type="password" id="reg-senha" placeholder="Crie uma senha forte" required>
+                </div>
+
+                <!-- Campos Específicos para Paciente -->
+                <div id="paciente-fields">
+                    <div class="form-group">
+                        <label for="reg-queixa">Qual sua queixa principal? (Opcional)</label>
+                        <textarea id="reg-queixa" rows="2" placeholder="Descreva brevemente..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Campos Específicos para Psicólogo -->
+                <div id="psicologo-fields" class="hidden">
+                    <div class="form-group" style="display: flex; gap: 1rem;">
+                        <div style="flex: 1;">
+                            <label for="reg-crp">Número do CRP</label>
+                            <input type="text" id="reg-crp" placeholder="Ex: 123456" pattern="[0-9]*">
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="reg-link">WhatsApp Link</label>
+                            <input type="text" id="reg-link" placeholder="Ex: 5511999999999">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="display: flex; gap: 1rem;">
+                        <div style="flex: 1;">
+                            <label for="reg-especialidade">Especialidade</label>
+                            <input type="text" id="reg-especialidade" placeholder="Ex: Psicologia Clínica">
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="reg-abordagem">Abordagem</label>
+                            <input type="text" id="reg-abordagem" placeholder="Ex: TCC, Psicanálise">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-valor">Valor da Sessão (R$)</label>
+                        <input type="number" id="reg-valor" placeholder="150.00" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-biografia">Biografia e Experiência</label>
+                        <textarea id="reg-biografia" rows="3" placeholder="Fale um pouco sobre sua carreira..."></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;">Finalizar Cadastro</button>
+                
+                <div class="toggle-text">
+                    Já possui conta? <a href="#" id="toggle-to-login">Voltar para o Login</a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Vanilla JS Module -->
+    <script type="module" src="../js/auth.js"></script>
+</body>
+</html>
