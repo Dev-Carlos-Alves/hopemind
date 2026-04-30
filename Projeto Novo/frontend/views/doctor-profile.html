@@ -79,6 +79,11 @@
             }
         }
     </style>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d6efd">
+
 </head>
 <body>
     <div class="container profile-container">
@@ -92,5 +97,17 @@
     </div>
     
     <script type="module" src="../js/doctor-profile.js"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(reg => console.log('Service Worker registrado!', reg))
+            .catch(err => console.error('Erro no Service Worker:', err));
+        });
+      }
+    </script>
+
 </body>
 </html>

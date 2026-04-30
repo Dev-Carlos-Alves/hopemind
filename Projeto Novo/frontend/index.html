@@ -25,9 +25,26 @@
             color: #666666;
         }
     </style>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d6efd">
+
 </head>
 <body>
     <h1>Bem-vindo ao HopeMind! 🧠💚</h1>
     <p>O servidor Node.js está rodando perfeitamente e conectado a esta página HTML (Fase 1 concluída).</p>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(reg => console.log('Service Worker registrado!', reg))
+            .catch(err => console.error('Erro no Service Worker:', err));
+        });
+      }
+    </script>
+
 </body>
 </html>
