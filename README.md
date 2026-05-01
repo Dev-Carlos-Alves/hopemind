@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # HopeMind - Plataforma de Saúde Mental (PWA)
 
 ## 1. Sobre o Projeto
@@ -66,3 +67,7 @@ Abaixo está o passo a passo caso você queira fazer o deploy apenas da parte **
     👉 **[Insira o link gerado pelo Netlify aqui]**
 
 *(Observação técnica: Como o sistema completo depende de Python/Flask e Banco de Dados MySQL, o deploy real da API exigiria o uso de servidores como Render ou Heroku. Porém, para fins de entrega do Front e PWA, as etapas visuais podem ser publicadas no Netlify Drop conforme detalhado acima).*
+=======
+# hopemind
+app de encontros de pacientes inteligentes
+>>>>>>> 135491d5e6e90d269ab7d83b4e9aa6b9b79703be
