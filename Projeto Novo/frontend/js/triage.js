@@ -120,11 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Erro ao processar as respostas.');
 
-            if (user.tipo === 'Paciente') {
-                window.location.href = '/views/dashboard-paciente.html';
-            } else {
-                window.location.href = '/views/dashboard-psicologo.html';
-            }
+            window.location.href = '/views/home.html';
 
         } catch (err) {
             showError(err.message);

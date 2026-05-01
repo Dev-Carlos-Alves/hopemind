@@ -93,10 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!data.user.has_triage && data.user.tipo !== 'Admin') {
                 window.location.href = '/views/triage.html';
-            } else if (data.user.tipo === 'Paciente') {
-                window.location.href = '/views/dashboard-paciente.html';
-            } else if (data.user.tipo === 'Psicologo') {
-                window.location.href = '/views/dashboard-psicologo.html';
+            } else if (data.user.tipo === 'Paciente' || data.user.tipo === 'Psicologo') {
+                window.location.href = '/views/home.html';
             } else {
                 window.location.href = '/views/admin.html';
             }

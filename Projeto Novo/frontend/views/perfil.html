@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HopeMind - Perfil</title>
+    <link rel="stylesheet" href="../css/global.css">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3F9A43">
+    <style>
+        .profile-form {
+            background: var(--color-white);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+            <div class="sidebar-profile">
+                <img src="../assets/images/logo.png" alt="User Profile" id="sidebar-user-photo" onerror="this.src='https://via.placeholder.com/80/A3E4D7/333333?text=User'">
+                <h3 id="sidebar-user-name">Carregando...</h3>
+                <a href="/views/perfil.html" id="btn-perfil" class="btn-perfil-sm">Perfil</a>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/views/home.html">🏠 <span class="nav-text">Início</span></a>
+                <a href="/views/dashboard-paciente.html" id="nav-matches" class="hidden">🤝 <span class="nav-text">Matches</span></a>
+                <a href="/views/meus-psicologos.html" id="nav-meus-psicologos" class="hidden">👤 <span class="nav-text">Meus Psicólogos</span></a>
+                <a href="/views/meus-pacientes.html" id="nav-meus-pacientes" class="hidden">👥 <span class="nav-text">Meus Pacientes</span></a>
+                <a href="/views/calendario.html">📅 <span class="nav-text">Calendário</span></a>
+                <a href="/views/ajustes.html">⚙️ <span class="nav-text">Ajustes</span></a>
+                <a href="#" id="btn-logout" style="margin-top: auto; color: #E74C3C;">🚪 <span class="nav-text">Sair</span></a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <h1 style="text-align: center; margin-top: 2rem;">Meu Perfil</h1>
+                <div class="profile-form">
+                    <div class="form-group">
+                        <label>Nome Completo</label>
+                        <input type="text" id="prof-nome" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>E-mail</label>
+                        <input type="email" id="prof-email" disabled value="usuario@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Conta</label>
+                        <input type="text" id="prof-tipo" disabled>
+                    </div>
+                    <p style="color: var(--color-text-muted); font-size: 0.9rem; text-align: center; margin-top: 1rem;">(A edição de perfil será habilitada em breve)</p>
+                    <button class="btn" style="width: 100%; margin-top: 1rem; opacity: 0.7;" disabled>Salvar Alterações</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userDataStr = localStorage.getItem('hopemind_user');
+            if (userDataStr) {
+                const user = JSON.parse(userDataStr);
+                document.getElementById('sidebar-user-name').textContent = user.nome.split(' ')[0];
+
+                
+                document.getElementById('prof-nome').value = user.nome;
+                document.getElementById('prof-tipo').value = user.tipo;
+                
+                if (user.tipo === 'Paciente') {
+                    document.getElementById('nav-matches').classList.remove('hidden');
+                    document.getElementById('nav-meus-psicologos').classList.remove('hidden');
+                } else if (user.tipo === 'Psicologo') {
+                    document.getElementById('nav-meus-pacientes').classList.remove('hidden');
+                }
+            }
+            document.getElementById('btn-logout').addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('hopemind_user');
+                localStorage.removeItem('hopemind_token');
+                window.location.href = '/views/login.html';
+            });
+        });
+    </script>
+
+    <script>
+        if (localStorage.getItem('sidebar_collapsed') === 'true') {
+            document.body.classList.add('sidebar-collapsed');
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('sidebar-toggle');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    document.body.classList.toggle('sidebar-collapsed');
+                    localStorage.setItem('sidebar_collapsed', document.body.classList.contains('sidebar-collapsed'));
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>

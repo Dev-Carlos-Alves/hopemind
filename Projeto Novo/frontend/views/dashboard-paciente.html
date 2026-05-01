@@ -87,8 +87,29 @@
 
 </head>
 <body>
-    <div class="container">
-        <div class="header-wrapper">
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+            <div class="sidebar-profile">
+                <img src="../assets/images/logo.png" alt="User Profile" id="sidebar-user-photo" onerror="this.src='https://via.placeholder.com/80/A3E4D7/333333?text=User'">
+                <h3 id="sidebar-user-name">Carregando...</h3>
+                <a href="/views/perfil.html" id="btn-perfil" class="btn-perfil-sm">Perfil</a>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/views/home.html">🏠 <span class="nav-text">Início</span></a>
+                <a href="/views/dashboard-paciente.html" class="active">🤝 <span class="nav-text">Matches</span></a>
+                <a href="/views/meus-psicologos.html" id="nav-meus-psicologos">👤 <span class="nav-text">Meus Psicólogos</span></a>
+                <a href="/views/calendario.html">📅 <span class="nav-text">Calendário</span></a>
+                <a href="/views/ajustes.html">⚙️ <span class="nav-text">Ajustes</span></a>
+                <a href="#" id="btn-logout" style="margin-top: auto; color: #E74C3C;">🚪 <span class="nav-text">Sair</span></a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <div class="header-wrapper">
             <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Seus Matches 🤝</h1>
             <p style="color: var(--color-text-muted); font-size: 1.1rem;">Com base no seu perfil, calculamos a afinidade com a nossa rede de psicólogos.</p>
         </div>
@@ -100,6 +121,8 @@
                 Buscando os melhores especialistas para você...
             </div>
         </div>
+    </div>
+        </main>
     </div>
 
     <script type="module" src="../js/dashboard.js"></script>
@@ -113,6 +136,38 @@
             .catch(err => console.error('Erro no Service Worker:', err));
         });
       }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userDataStr = localStorage.getItem('hopemind_user');
+            if (userDataStr) {
+                const user = JSON.parse(userDataStr);
+                document.getElementById('sidebar-user-name').textContent = user.nome.split(' ')[0];
+
+            }
+            document.getElementById('btn-logout').addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('hopemind_user');
+                localStorage.removeItem('hopemind_token');
+                window.location.href = '/views/login.html';
+            });
+        });
+    </script>
+
+    <script>
+        if (localStorage.getItem('sidebar_collapsed') === 'true') {
+            document.body.classList.add('sidebar-collapsed');
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('sidebar-toggle');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    document.body.classList.toggle('sidebar-collapsed');
+                    localStorage.setItem('sidebar_collapsed', document.body.classList.contains('sidebar-collapsed'));
+                });
+            }
+        });
     </script>
 
 </body>

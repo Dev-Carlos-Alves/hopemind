@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HopeMind - Início</title>
+    <link rel="stylesheet" href="../css/global.css">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3F9A43">
+
+    <style>
+        .home-header {
+            background-color: var(--color-white);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+        .home-header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+        }
+        .home-header p {
+            color: var(--color-text-muted);
+            font-size: 1.1rem;
+        }
+        
+        .quote-box {
+            background: linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2));
+            color: var(--color-white);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            font-style: italic;
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(63, 154, 67, 0.3);
+        }
+
+        .news-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .news-card {
+            background-color: var(--color-white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+        .news-card:hover {
+            transform: translateY(-5px);
+        }
+        .news-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background-color: var(--color-primary-light);
+        }
+        .news-content {
+            padding: 1.5rem;
+        }
+        .news-content h3 {
+            font-size: 1.2rem;
+            color: var(--color-text-main);
+            margin-bottom: 0.5rem;
+        }
+        .news-content p {
+            font-size: 0.95rem;
+            color: var(--color-text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+            <div class="sidebar-profile">
+                <img src="../assets/images/logo.png" alt="User Profile" id="sidebar-user-photo" onerror="this.src='https://via.placeholder.com/80/A3E4D7/333333?text=User'">
+                <h3 id="sidebar-user-name">Carregando...</h3>
+                <a href="/views/perfil.html" id="btn-perfil" class="btn-perfil-sm">Perfil</a>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/views/home.html" class="active">🏠 <span class="nav-text">Início</span></a>
+                <a href="/views/dashboard-paciente.html">🤝 <span class="nav-text">Matches</span></a>
+                <a href="/views/meus-psicologos.html" id="nav-meus-psicologos" class="hidden">👤 <span class="nav-text">Meus Psicólogos</span></a>
+                <a href="/views/meus-pacientes.html" id="nav-meus-pacientes" class="hidden">👥 <span class="nav-text">Meus Pacientes</span></a>
+                <a href="/views/calendario.html">📅 <span class="nav-text">Calendário</span></a>
+                <a href="/views/ajustes.html">⚙️ <span class="nav-text">Ajustes</span></a>
+                <a href="#" id="btn-logout" style="margin-top: auto; color: #E74C3C;">🚪 <span class="nav-text">Sair</span></a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="home-header">
+                <h1 id="welcome-message">Bem-vindo(a) ao HopeMind! 💚</h1>
+                <p>Nossa plataforma foi criada para oferecer um ambiente seguro e acolhedor. Aqui, a tecnologia atua como uma ponte entre você e profissionais qualificados para apoiar sua saúde mental. Explore os conteúdos, conecte-se e cuide-se!</p>
+            </div>
+
+            <div class="quote-box" id="quote-box">
+                "Cuidar da própria mente não é um luxo, é a maior necessidade humana."
+            </div>
+
+            <h2 style="margin-bottom: 1.5rem; color: var(--color-text-main);">Notícias e Artigos</h2>
+            <div class="news-section">
+                <article class="news-card">
+                    <div class="news-img" style="background-image: url('https://images.unsplash.com/photo-1499209974431-9dddcece7f88?auto=format&fit=crop&w=600&q=80'); background-size: cover;"></div>
+                    <div class="news-content">
+                        <h3>A importância da pausa</h3>
+                        <p>Descubra como pequenas pausas durante o dia podem reduzir drasticamente os níveis de ansiedade e aumentar a produtividade e o bem-estar.</p>
+                    </div>
+                </article>
+                <article class="news-card">
+                    <div class="news-img" style="background-image: url('https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=600&q=80'); background-size: cover;"></div>
+                    <div class="news-content">
+                        <h3>Práticas de Mindfulness</h3>
+                        <p>Exercícios simples de atenção plena que você pode realizar em qualquer lugar para retornar ao momento presente.</p>
+                    </div>
+                </article>
+                <article class="news-card">
+                    <div class="news-img" style="background-image: url('https://images.unsplash.com/photo-1471666875520-c75081f42081?auto=format&fit=crop&w=600&q=80'); background-size: cover;"></div>
+                    <div class="news-content">
+                        <h3>Sono e Saúde Mental</h3>
+                        <p>A relação íntima entre uma boa noite de sono e a estabilidade emocional e cognitiva ao longo da semana.</p>
+                    </div>
+                </article>
+            </div>
+        </main>
+    </div>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js');
+        });
+      }
+    </script>
+
+    <!-- UI Logic Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userDataStr = localStorage.getItem('hopemind_user');
+            if (!userDataStr) {
+                window.location.href = '/views/login.html';
+                return;
+            }
+            
+            const user = JSON.parse(userDataStr);
+            document.getElementById('sidebar-user-name').textContent = user.nome.split(' ')[0];
+
+            document.getElementById('welcome-message').textContent = `Olá, ${user.nome.split(' ')[0]}! 💚`;
+
+            // Adjust navigation based on role
+            if (user.tipo === 'Paciente') {
+                document.getElementById('nav-meus-psicologos').classList.remove('hidden');
+            } else if (user.tipo === 'Psicologo') {
+                document.getElementById('nav-meus-pacientes').classList.remove('hidden');
+            }
+
+            // Quotes randomizer
+            const quotes = [
+                '"Cuidar da própria mente não é um luxo, é a maior necessidade humana."',
+                '"Você não precisa ter tudo resolvido hoje. Dê um passo de cada vez."',
+                '"O autoconhecimento é o começo de todas as curas."',
+                '"Sua saúde mental é uma prioridade. Sua paz é essencial."'
+            ];
+            document.getElementById('quote-box').textContent = quotes[Math.floor(Math.random() * quotes.length)];
+
+            // Logout
+            document.getElementById('btn-logout').addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('hopemind_user');
+                localStorage.removeItem('hopemind_token');
+                window.location.href = '/views/login.html';
+            });
+        });
+    </script>
+
+    <script>
+        if (localStorage.getItem('sidebar_collapsed') === 'true') {
+            document.body.classList.add('sidebar-collapsed');
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('sidebar-toggle');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    document.body.classList.toggle('sidebar-collapsed');
+                    localStorage.setItem('sidebar_collapsed', document.body.classList.contains('sidebar-collapsed'));
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
