@@ -106,7 +106,7 @@ def register():
                                (user_id, crp, link_contato, especialidade, abordagem, biografia, valor))
         conn.commit()
         return jsonify({"message": "Registrado com sucesso", "idUsuario": user_id}), 201
-    except pymysql.err.IntegrityError:
+    except pymysql.IntegrityError:
         return jsonify({"error": "E-mail ou CPF já cadastrados."}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -158,7 +158,7 @@ def login():
             token = jwt.encode({
                 'user_id': user['ID_Usuario'],
                 'role': user['Tipo_Usuario'],
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+                'exp': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24)
             }, app.config['SECRET_KEY'], algorithm="HS256")
             
             return jsonify({"message": "Login realizado", "token": token, "user": user_dict})
