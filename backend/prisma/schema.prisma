@@ -1,0 +1,202 @@
+// HopeMind - Prisma Schema (PostgreSQL)
+// Enterprise Standard: Modelo Prottus
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  PATIENT
+  PSYCHOLOGIST
+  ADMIN
+}
+
+enum TargetAudience {
+  PATIENT
+  PSYCHOLOGIST
+  BOTH
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id           Int          @id @default(autoincrement())
+  email        String       @unique @db.VarChar(255)
+  passwordHash String       @map("password_hash") @db.VarChar(255)
+  name         String       @db.VarChar(255)
+  cpf          String       @unique @db.VarChar(20)
+  phone        String       @db.VarChar(50)
+  birthDate    DateTime     @map("birth_date") @db.Date
+  gender       String       @db.VarChar(50)
+  userType     UserType     @default(PATIENT) @map("user_type")
+  isActive     Boolean      @default(true) @map("is_active")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  patient      Patient?
+  psychologist Psychologist?
+  auditLogs    AuditLog[]
+
+  @@map("users")
+}
+
+model Patient {
+  id            Int             @id @default(autoincrement())
+  userId        Int             @unique @map("user_id")
+  mainComplaint String?         @map("main_complaint") @db.Text
+  createdAt     DateTime        @default(now()) @map("created_at")
+
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  patientTags   PatientTag[]
+  answers       PatientAnswer[]
+  appointments  Appointment[]
+
+  @@map("patients")
+}
+
+model Psychologist {
+  id                   Int                  @id @default(autoincrement())
+  userId               Int                  @unique @map("user_id")
+  crp                  String               @unique @db.VarChar(50)
+  contactLink          String?              @map("contact_link") @db.VarChar(500)
+  specialty            String               @db.VarChar(255)
+  therapeuticApproach String               @map("therapeutic_approach") @db.VarChar(255)
+  biography            String?              @db.Text
+  sessionFee           Decimal              @default(0.00) @map("session_fee") @db.Decimal(10, 2)
+  createdAt            DateTime             @default(now()) @map("created_at")
+
+  user                 User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  psychologistTags     PsychologistTag[]
+  answers              PsychologistAnswer[]
+  appointments         Appointment[]
+
+  @@map("psychologists")
+}
+
+model Tag {
+  id               Int               @id @default(autoincrement())
+  code             String            @unique @db.VarChar(100)
+  name             String            @db.VarChar(255)
+  category         String            @db.VarChar(100)
+
+  patientTags      PatientTag[]
+  psychologistTags PsychologistTag[]
+  triageOptions    TriageOption[]
+
+  @@map("tags")
+}
+
+model PatientTag {
+  patientId Int     @map("patient_id")
+  tagId     Int     @map("tag_id")
+
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([patientId, tagId])
+  @@map("patient_tags")
+}
+
+model PsychologistTag {
+  psychologistId Int          @map("psychologist_id")
+  tagId          Int          @map("tag_id")
+
+  psychologist   Psychologist @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+  tag            Tag          @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([psychologistId, tagId])
+  @@map("psychologist_tags")
+}
+
+model TriageQuestion {
+  id             Int            @id @default(autoincrement())
+  targetAudience TargetAudience @default(BOTH) @map("target_audience")
+  questionText   String         @map("question_text") @db.Text
+  orderNum       Int            @default(0) @map("order_num")
+
+  options        TriageOption[]
+  patientAnswers PatientAnswer[]
+  psychologistAnswers PsychologistAnswer[]
+
+  @@map("triage_questions")
+}
+
+model TriageOption {
+  id         Int            @id @default(autoincrement())
+  questionId Int            @map("question_id")
+  tagId      Int?           @map("tag_id")
+  optionText String         @map("option_text") @db.VarChar(255)
+
+  question   TriageQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  tag        Tag?           @relation(fields: [tagId], references: [id], onDelete: SetNull)
+
+  patientAnswers PatientAnswer[]
+  psychologistAnswers PsychologistAnswer[]
+
+  @@map("triage_options")
+}
+
+model PatientAnswer {
+  id         Int            @id @default(autoincrement())
+  patientId  Int            @map("patient_id")
+  questionId Int            @map("question_id")
+  optionId   Int            @map("option_id")
+  createdAt  DateTime       @default(now()) @map("created_at")
+
+  patient    Patient        @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  question   TriageQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  option     TriageOption   @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@map("patient_answers")
+}
+
+model PsychologistAnswer {
+  id             Int            @id @default(autoincrement())
+  psychologistId Int            @map("psychologist_id")
+  questionId     Int            @map("question_id")
+  optionId       Int            @map("option_id")
+  createdAt      DateTime       @default(now()) @map("created_at")
+
+  psychologist   Psychologist   @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+  question       TriageQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  option         TriageOption   @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@map("psychologist_answers")
+}
+
+model Appointment {
+  id              Int               @id @default(autoincrement())
+  psychologistId  Int               @map("psychologist_id")
+  patientId       Int               @map("patient_id")
+  appointmentDate DateTime          @map("appointment_date")
+  status          AppointmentStatus @default(SCHEDULED)
+  createdAt       DateTime          @default(now()) @map("created_at")
+
+  psychologist    Psychologist      @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+  patient         Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@map("appointments")
+}
+
+model AuditLog {
+  id         BigInt   @id @default(autoincrement())
+  entityName String   @map("entity_name") @db.VarChar(100)
+  entityId   String?  @map("entity_id") @db.VarChar(100)
+  action     String   @db.VarChar(50)
+  payload    Json?
+  userId     Int?     @map("user_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}

@@ -1,0 +1,16 @@
+{
+  "name": "hopemind-prottus",
+  "private": true,
+  "description": "HopeMind - Plataforma de Saúde Mental (PWA + Modular Monolith NestJS + React SPA)",
+  "scripts": {
+    "setup": "bash database/scripts/setup.sh && bash database/scripts/migrate.sh && bash database/scripts/check.sh",
+    "migrate": "bash database/scripts/migrate.sh",
+    "check:db": "bash database/scripts/check.sh",
+    "dev:api": "npm run dev --prefix backend",
+    "dev:web": "npm run dev --prefix frontend",
+    "lint": "npm run lint --prefix backend && npm run lint --prefix frontend",
+    "test": "npm run test --prefix backend",
+    "test:smoke": "node tests/load/run-node.mjs smoke",
+    "install:all": "npm install --prefix backend && npm install --prefix frontend"
+  }
+}

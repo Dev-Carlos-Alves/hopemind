@@ -1,0 +1,81 @@
+# Código anotado — Distac
+
+Índice regenerado da árvore atual. Execute `node docs/projeto/codigo/_gerar.mjs` depois de adicionar, remover ou mover fontes.
+
+A API usa o prefixo `/api` e Swagger em `/api/docs`.
+
+| Fonte |
+|-------|
+| [`backend/prisma/migrations/20260723135213_init_auth_and_domain/migration.sql`](backend/prisma/migrations/20260723135213_init_auth_and_domain/migration.md) |
+| [`backend/prisma/migrations/20260723181500_triggers_audit_integrity/migration.sql`](backend/prisma/migrations/20260723181500_triggers_audit_integrity/migration.md) |
+| [`backend/prisma/migrations/20260723182933_cadu/migration.sql`](backend/prisma/migrations/20260723182933_cadu/migration.md) |
+| [`backend/prisma/migrations/20260723183500_restore_audit_log_id_default/migration.sql`](backend/prisma/migrations/20260723183500_restore_audit_log_id_default/migration.md) |
+| [`backend/prisma/migrations/20260730120000_english_domain/migration.sql`](backend/prisma/migrations/20260730120000_english_domain/migration.md) |
+| [`backend/prisma/schema.prisma`](backend/prisma/schema.md) |
+| [`backend/prisma/seed.ts`](backend/prisma/seed.md) |
+| [`backend/src/app.module.ts`](backend/src/app.module.md) |
+| [`backend/src/auth/auth.controller.ts`](backend/src/auth/auth.controller.md) |
+| [`backend/src/auth/auth.module.ts`](backend/src/auth/auth.module.md) |
+| [`backend/src/auth/auth.service.ts`](backend/src/auth/auth.service.md) |
+| [`backend/src/auth/dto/login.dto.ts`](backend/src/auth/dto/login.dto.md) |
+| [`backend/src/auth/jwt-auth.guard.ts`](backend/src/auth/jwt-auth.guard.md) |
+| [`backend/src/auth/jwt.strategy.ts`](backend/src/auth/jwt.strategy.md) |
+| [`backend/src/clients/clients.controller.ts`](backend/src/clients/clients.controller.md) |
+| [`backend/src/clients/clients.module.ts`](backend/src/clients/clients.module.md) |
+| [`backend/src/clients/clients.service.spec.ts`](backend/src/clients/clients.service.spec.md) |
+| [`backend/src/clients/clients.service.ts`](backend/src/clients/clients.service.md) |
+| [`backend/src/clients/dto/client.dto.ts`](backend/src/clients/dto/client.dto.md) |
+| [`backend/src/common/pagination.ts`](backend/src/common/pagination.md) |
+| [`backend/src/common/public.decorator.ts`](backend/src/common/public.decorator.md) |
+| [`backend/src/config/env.validation.ts`](backend/src/config/env.validation.md) |
+| [`backend/src/dashboard/dashboard.controller.ts`](backend/src/dashboard/dashboard.controller.md) |
+| [`backend/src/dashboard/dashboard.module.ts`](backend/src/dashboard/dashboard.module.md) |
+| [`backend/src/dashboard/dashboard.service.ts`](backend/src/dashboard/dashboard.service.md) |
+| [`backend/src/health.controller.ts`](backend/src/health.controller.md) |
+| [`backend/src/main.ts`](backend/src/main.md) |
+| [`backend/src/orders/dto/order.dto.ts`](backend/src/orders/dto/order.dto.md) |
+| [`backend/src/orders/orders.controller.ts`](backend/src/orders/orders.controller.md) |
+| [`backend/src/orders/orders.module.ts`](backend/src/orders/orders.module.md) |
+| [`backend/src/orders/orders.service.spec.ts`](backend/src/orders/orders.service.spec.md) |
+| [`backend/src/orders/orders.service.ts`](backend/src/orders/orders.service.md) |
+| [`backend/src/prisma/prisma.module.ts`](backend/src/prisma/prisma.module.md) |
+| [`backend/src/prisma/prisma.service.ts`](backend/src/prisma/prisma.service.md) |
+| [`backend/src/products/dto/product.dto.ts`](backend/src/products/dto/product.dto.md) |
+| [`backend/src/products/products.controller.ts`](backend/src/products/products.controller.md) |
+| [`backend/src/products/products.module.ts`](backend/src/products/products.module.md) |
+| [`backend/src/products/products.service.spec.ts`](backend/src/products/products.service.spec.md) |
+| [`backend/src/products/products.service.ts`](backend/src/products/products.service.md) |
+| [`backend/src/users/dto/user.dto.ts`](backend/src/users/dto/user.dto.md) |
+| [`backend/src/users/users.controller.ts`](backend/src/users/users.controller.md) |
+| [`backend/src/users/users.module.ts`](backend/src/users/users.module.md) |
+| [`backend/src/users/users.service.ts`](backend/src/users/users.service.md) |
+| [`backend/stress/helpers.ts`](backend/stress/helpers.md) |
+| [`backend/stress/run.ts`](backend/stress/run.md) |
+| [`frontend/index.html`](frontend/index.md) |
+| [`frontend/src/App.tsx`](frontend/src/App.md) |
+| [`frontend/src/auth/AuthContext.tsx`](frontend/src/auth/AuthContext.md) |
+| [`frontend/src/auth/ProtectedRoute.tsx`](frontend/src/auth/ProtectedRoute.md) |
+| [`frontend/src/components/AppShell.css`](frontend/src/components/AppShell.md) |
+| [`frontend/src/components/AppShell.tsx`](frontend/src/components/AppShell.md) |
+| [`frontend/src/components/DataTable.tsx`](frontend/src/components/DataTable.md) |
+| [`frontend/src/components/FilterBar.tsx`](frontend/src/components/FilterBar.md) |
+| [`frontend/src/components/Icon.tsx`](frontend/src/components/Icon.md) |
+| [`frontend/src/components/Modal.css`](frontend/src/components/Modal.md) |
+| [`frontend/src/components/Modal.tsx`](frontend/src/components/Modal.md) |
+| [`frontend/src/components/PaginationBar.tsx`](frontend/src/components/PaginationBar.md) |
+| [`frontend/src/components/StatusToggle.tsx`](frontend/src/components/StatusToggle.md) |
+| [`frontend/src/lib/api.ts`](frontend/src/lib/api.md) |
+| [`frontend/src/lib/resources.ts`](frontend/src/lib/resources.md) |
+| [`frontend/src/lib/types.ts`](frontend/src/lib/types.md) |
+| [`frontend/src/main.tsx`](frontend/src/main.md) |
+| [`frontend/src/pages/ClientsPage.tsx`](frontend/src/pages/ClientsPage.md) |
+| [`frontend/src/pages/HomePage.css`](frontend/src/pages/HomePage.md) |
+| [`frontend/src/pages/HubPage.tsx`](frontend/src/pages/HubPage.md) |
+| [`frontend/src/pages/LoginPage.css`](frontend/src/pages/LoginPage.md) |
+| [`frontend/src/pages/LoginPage.tsx`](frontend/src/pages/LoginPage.md) |
+| [`frontend/src/pages/OrdersPage.tsx`](frontend/src/pages/OrdersPage.md) |
+| [`frontend/src/pages/ProductsPage.tsx`](frontend/src/pages/ProductsPage.md) |
+| [`frontend/src/pages/UsersPage.tsx`](frontend/src/pages/UsersPage.md) |
+| [`frontend/src/styles/base.css`](frontend/src/styles/base.md) |
+| [`frontend/src/styles/crud.css`](frontend/src/styles/crud.md) |
+| [`frontend/src/styles/distac-tokens.css`](frontend/src/styles/distac-tokens.md) |
