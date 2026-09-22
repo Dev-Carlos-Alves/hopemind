@@ -8,8 +8,15 @@ export const Header: React.FC = () => {
   return (
     <header className="header">
       <div className="header__brand">
-        <Icon name="brain" size={22} color="#4CAF50" />
-        <span>HopeMind</span>
+        <img
+          src="/images/logo-hopemind-full.png"
+          alt="HopeMind"
+          style={{ height: '28px', width: 'auto', objectFit: 'contain' }}
+        />
+        <span style={{ fontSize: '15px', fontWeight: '700', letterSpacing: '0.5px' }}>HopeMind</span>
+        <span style={{ fontSize: '10px', color: '#A3E635', opacity: 0.8, textTransform: 'uppercase', paddingLeft: '8px' }}>
+          by SafeMindLive
+        </span>
       </div>
 
       {user && (

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Icon } from '../components/Icon';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -37,18 +36,28 @@ export const LoginPage: React.FC = () => {
         minHeight: '100vh',
         backgroundColor: 'var(--page-bg)',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '20px',
       }}
     >
-      <div className="card" style={{ width: '100%', maxWidth: '400px', padding: '24px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px' }}>
-            <Icon name="brain" size={28} color="#2E7D32" />
-            <h1 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--brand-primary)' }}>HopeMind</h1>
-          </div>
-          <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Plataforma de Saúde Mental & Triagem Inteligente</p>
+      <div className="card" style={{ width: '100%', maxWidth: '420px', padding: '28px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <img
+            src="/images/logo-hopemind-full.png"
+            alt="HopeMind Logo"
+            style={{ maxHeight: '60px', width: 'auto', marginBottom: '12px', objectFit: 'contain' }}
+            onError={(e) => {
+              (e.target as HTMLElement).style.display = 'none';
+            }}
+          />
+          <h1 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--brand-primary)', marginBottom: '4px' }}>
+            HopeMind
+          </h1>
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+            Plataforma de Saúde Mental & Triagem Inteligente
+          </p>
         </div>
 
         {error && (
@@ -56,10 +65,11 @@ export const LoginPage: React.FC = () => {
             style={{
               backgroundColor: '#FEE2E2',
               color: '#B91C1C',
-              padding: '8px 12px',
+              padding: '10px 12px',
               borderRadius: '4px',
               fontSize: '12px',
               marginBottom: '16px',
+              border: '1px solid #FCA5A5',
             }}
           >
             {error}
@@ -99,7 +109,7 @@ export const LoginPage: React.FC = () => {
             type="submit"
             className="btn btn-primary"
             disabled={loading}
-            style={{ width: '100%', marginTop: '12px' }}
+            style={{ width: '100%', marginTop: '14px', height: '36px', fontSize: '14px' }}
           >
             {loading ? 'Entrando...' : 'Entrar na Plataforma'}
           </button>
@@ -111,6 +121,16 @@ export const LoginPage: React.FC = () => {
             Cadastre-se aqui
           </Link>
         </div>
+      </div>
+
+      {/* SafeMindLive Branding Footer */}
+      <div style={{ marginTop: '24px', display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.85 }}>
+        <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Desenvolvido por</span>
+        <img
+          src="/images/safe-mind-live-logo.png"
+          alt="SafeMindLive Logo"
+          style={{ height: '24px', width: 'auto', objectFit: 'contain' }}
+        />
       </div>
     </div>
   );
