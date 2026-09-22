@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hopemind - Chat com Rafael Moura</title>
+    <link rel="stylesheet" href="css/styles-chat.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="chat-screen">
+
+    <div class="app-container chat-container">
+        <header class="chat-header">
+            <a href="doctor-profile.html" class="icon-button back-button" aria-label="Voltar">
+                <span class="material-icons">arrow_back</span>
+            </a>
+            <div class="profile-summary">
+                <img src="img/perfil-rafael.png" alt="Foto de perfil de Rafael Moura" class="profile-pic-small">
+                <div class="profile-details">
+                    <h1 class="chat-title">Rafael Moura</h1>
+                    <p class="chat-status">Ativo Agora <span class="status-dot"></span></p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="icon-button call-button" aria-label="Ligar para Rafael">
+                    <span class="material-icons">call</span>
+                </button>
+                <button class="icon-button video-button" aria-label="Iniciar videochamada com Rafael">
+                    <span class="material-icons">videocam</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="chat-messages-area">
+            <div class="message-group received">
+                <img src="img/perfil-rafael.png" alt="Foto de perfil de Rafael Moura" class="message-sender-pic">
+                <div class="message-bubble received">
+                    <p>Você ainda está viajando?</p>
+                </div>
+            </div>
+
+            <div class="message-group sent">
+                <div class="message-bubble sent">
+                    <p>Sim, estou em Istambul</p>
+                </div>
+            </div>
+
+            <div class="message-group received">
+                <img src="img/perfil-rafael.png" alt="Foto de perfil de Rafael Moura" class="message-sender-pic">
+                <div class="message-bubble received">
+                    <p>Nossa! que bacana.</p>
+                </div>
+            </div>
+
+            <div class="message-group received">
+                <img src="img/perfil-rafael.png" alt="Foto de perfil de Rafael Moura" class="message-sender-pic">
+                <div class="message-bubble received">
+                    <p>Como vão as coisas por aí??</p>
+                </div>
+            </div>
+
+            <div class="message-group sent">
+                <div class="message-bubble sent audio-message">
+                    <span class="material-icons play-icon">play_arrow</span>
+                    <div class="audio-waveform"></div>
+                    <span class="audio-duration"></span> </div>
+            </div>
+
+            <div class="chat-date-separator">
+                <span>Quarta-feira, 6 de maio de 2025</span>
+            </div>
+
+            <div class="message-group received">
+                <img src="img/perfil-rafael.png" alt="Foto de perfil de Rafael Moura" class="message-sender-pic">
+                <div class="message-bubble received">
+                    <p>Oi, você soube?</p>
+                </div>
+            </div>
+
+            <div class="message-group received">
+                <img src="img/perfil-rafael.png" alt="Foto de perfil de Rafael Moura" class="message-sender-pic">
+                <div class="message-bubble received audio-message paused">
+                    <span class="material-icons pause-icon">pause</span>
+                    <div class="audio-waveform"></div>
+                    <span class="audio-duration"></span> </div>
+            </div>
+
+            <div class="message-group received">
+                <img src="img/perfil-rafael.png" alt="Foto de perfil de Rafael Moura" class="message-sender-pic">
+                <div class="message-bubble received">
+                    <p>Ok!</p>
+                </div>
+            </div>
+
+            <div class="message-group sent">
+                <div class="message-bubble sent audio-message">
+                    <span class="material-icons play-icon">play_arrow</span>
+                    <div class="audio-waveform"></div>
+                    <span class="audio-duration"></span> </div>
+            </div>
+
+        </main>
+
+        <footer class="message-input-area">
+            <input type="text" class="message-input" placeholder="Envie a mensagem">
+            <button

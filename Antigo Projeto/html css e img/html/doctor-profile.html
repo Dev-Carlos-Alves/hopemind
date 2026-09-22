@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hopemind - Perfil do Doutor</title>
+    <link rel="stylesheet" href="css/styles-doctor-profile.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="doctor-profile-screen">
+
+    <div class="app-container">
+        <header class="profile-header">
+            <a href="welcome.html" class="icon-button back-button" aria-label="Voltar para a página anterior">
+                <span class="material-icons">arrow_back</span>
+            </a>
+            <h1 class="screen-title">PERFIL DO PROFISSIONAL</h1>
+            <button class="icon-button menu-button" aria-label="Mais opções">
+                <span class="material-icons">more_vert</span>
+            </button>
+        </header>
+
+        <main class="profile-main-content">
+            <div class="doctor-info-card">
+                <img src="img/perfil-rafael.png" alt="Foto de perfil do Dr. Rafael Moura" class="doctor-profile-picture">
+                <h2 class="doctor-name">Rafael Moura</h2>
+                <p class="doctor-specialty">Psicólogo TCC</p>
+
+                <div class="contact-buttons">
+                    <button class="contact-icon-button" aria-label="Chamada de vídeo">
+                        <img src="img/video-call-sms.png" alt="Ícone de vídeo" class="contact-icon video">
+						<a href="video-call.html">
+                    </button>
+                </div>
+            </div>
+
+            <section class="about-section">
+                <div class="about-header">
+                    <h3 class="about-title">Sobre o profissional</h3>
+                    <div class="rating">
+                        <span class="material-icons star-icon">star</span>
+                        <span class="rating-value">4.9</span>
+                        <span class="review-count">(280 Reviews)</span>
+                    </div>
+                </div>
+                <p class="about-description">
+                    Tenho 39 anos e sou psicólogo especializado em Terapia cognitiva comportamental (TCC) com mais de 12 anos de experiência.
+                </p>
+            </section>
+
+            <section class="availability-section">
+                <span class="availability-text">Disponível</span>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                </label>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active" aria-label="Início">
+                <span class="material-icons">home</span>
+            </a>
+            <a href="#" class="nav-item" aria-label="Notificações">
+                <span class="material-icons">notifications</span>
+            </a>
+            <a href="#" class="nav-item" aria-label="Perfil">
+                <span class="material-icons">person</span>
+            </a>
+        </nav>
+    </div>
+
+</body>
+</html>

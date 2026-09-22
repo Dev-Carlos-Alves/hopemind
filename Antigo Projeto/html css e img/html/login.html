@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hopemind - Login</title>
+    <link rel="stylesheet" href="css/styles-login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto&display=swap" rel="stylesheet">
+</head>
+<body class="login-screen">
+
+    <div class="app-container">
+        <header class="status-bar">
+            <img src="img/status-icons.png" alt="Hora, Sinal de Wifi e Bateria" class="status-icons-full"> 
+        </header>
+
+        <div class="splash-top-decoration">
+            <div class="circle-large"></div>
+            <div class="circle-small"></div>
+        </div>
+
+        <main class="login-content-wrapper">
+            <img src="img/logo-hopemind-full.png" alt="Logo Hopemind" class="login-logo">
+
+            <h1 class="login-title">Login</h1>
+
+            <form action="#" method="post" class="login-form">
+                <label for="email" class="form-label">E-mail</label>
+                <input type="email" id="email" name="email" placeholder="Digite seu email" required class="form-input">
+
+                <label for="password" class="form-label">Senha</label>
+                <input type="password" id="password" name="password" placeholder="Digite sua senha" required class="form-input">
+
+                <a href="IA.html" class="btn-primary-splash btn-login-action">Faça o Login</a> 
+                </form>
+            
+            <div class="login-links">
+                <a href="forgot-password.html" class="link-forgot-password">Esqueci minha senha</a>
+                <span class="link-separator">|</span>
+                <a href="registration.html" class="link-register">Cadastrar</a>
+            </div>
+            
+            <form action="#" method="post" class="social-login-form">
+                <button type="submit" class="btn-social btn-google">
+                    <img src="img/google-logo.png" alt="Logo Google" class="icon-social">
+                    <span>Login com o Google</span>
+                </button>
+                
+                <button type="submit" class="btn-social btn-facebook">
+                    <img src="img/facebook-logo.png" alt="Logo Facebook" class="icon-social">
+                    <span>Login com o Facebook</span>
+                </button>
+                
+                <button type="submit" class="btn-social btn-govbr">
+                    <img src="img/gov-logo.png" alt="Logo Gov.br" class="icon-social">
+                    <span>Login com o Gov.br</span>
+                </button>
+            </form>
+
+        </main>
+    </div>
+
+</body>
+</html>

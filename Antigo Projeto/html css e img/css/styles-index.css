@@ -1,0 +1,193 @@
+/* Variáveis CSS para cores e tamanhos */
+:root {
+    --splash-background: #F5F3EF;
+    --splash-green-circle: #D4F4D3;
+    --splash-button-green: #6FCF97;
+    --splash-button-hover: #5cb87c;
+    --text-dark: #333333;
+    --text-medium: #666666;
+    --safe-mind-orange: #F2994A;
+}
+
+
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    color: var(--text-dark);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body.splash-screen {
+    background-color: var(--splash-background);
+}
+
+.app-container {
+    max-width: 450px;
+    margin: 0 auto;
+    background-color: #FFFFFF;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Cabeçalho da Barra de Status */
+.status-bar {
+    width: 100%;
+    padding: 10px 20px;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+.status-bar .status-icons-full {
+    width: 90%;
+    max-width: 300px;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Elementos decorativos do topo */
+.splash-top-decoration {
+    position: absolute;
+    top: -80px;
+    left: -80px;
+    width: 200px;
+    height: 200px;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.splash-top-decoration .circle-large {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 150px;
+    height: 150px;
+    background-color: var(--splash-green-circle);
+    border-radius: 50%;
+    opacity: 0.7;
+}
+
+.splash-top-decoration .circle-small {
+    position: absolute;
+    top: 80px;
+    left: 80px;
+    width: 80px;
+    height: 80px;
+    background-color: var(--splash-green-circle);
+    border-radius: 50%;
+    opacity: 0.5;
+}
+
+/* Wrapper para o conteúdo principal da splash */
+.splash-content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    z-index: 5;
+    padding-top: 50px;
+}
+
+/* Seção da logo principal (cérebro e mãos) */
+.splash-main-section {
+    margin-bottom: 60px;
+}
+
+.hopemind-logo-full {
+    max-width: 400px;
+    height: auto;
+    display: block;
+    margin-top: 150px;
+}
+
+/* Seção "Desenvolvido por" */
+.splash-developed-by {
+    margin-top: auto;
+    margin-bottom: 20px;
+}
+
+.splash-developed-by .developed-by-text {
+    font-size: 14px;
+    color: var(--text-medium);
+    margin-bottom: 10px;
+}
+
+.splash-developed-by .safe-mind-logo {
+    max-width: 120px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Botão "Iniciar" */
+.splash-action {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.btn-primary-splash {
+    display: block;
+    width: 100%;
+    max-width: 250px;
+    padding: 15px 30px;
+    background-color: var(--splash-button-green);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary-splash:hover {
+    background-color: var(--splash-button-hover);
+}
+
+/* Media Queries para responsividade */
+@media (max-width: 375px) {
+    .status-bar .status-icons-full {
+        height: 16px;
+    }
+    .splash-top-decoration {
+        top: -70px;
+        left: -70px;
+    }
+    .splash-top-decoration .circle-large {
+        width: 130px;
+        height: 130px;
+    }
+    .splash-top-decoration .circle-small {
+        top: 70px;
+        left: 70px;
+        width: 70px;
+        height: 70px;
+    }
+    .hopemind-logo-full {
+        max-width: 220px;
+        margin-bottom: 40px;
+    }
+    .safe-mind-logo {
+        max-width: 100px;
+    }
+    .btn-primary-splash {
+        font-size: 16px;
+        padding: 12px 25px;
+    }
+}
