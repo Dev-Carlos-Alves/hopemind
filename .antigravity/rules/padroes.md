@@ -1,8 +1,8 @@
-# Prottus — Regras Antigravity
+# SafeMindLive — Regras Antigravity
 
 ## Documentação Mestra
-- Metodologia: `docs/prottus/metodologia.md`
-- Design System: `docs/prottus/design-system.md`
+- Metodologia: `docs/safemindlive/metodologia.md`
+- Design System: `docs/safemindlive/design-system.md`
 - Mapa de Entidades: `docs/projeto/mapa-entidades.md`
 - Arquitetura: `docs/projeto/ARQUITETURA-WEB.md`
 
@@ -12,3 +12,4 @@
 - Títulos de módulo UPPERCASE bold
 - Densidade de botões e inputs de 32px
 - Segurança: JWT cookies httpOnly, Helmet, Throttler rate limit, Swagger
+- Comando único de dev: `npm run dev`

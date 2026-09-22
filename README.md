@@ -1,18 +1,18 @@
 # HopeMind — Plataforma de Saúde Mental
 
-**Referência operacional da Prottus** para a plataforma web PWA de triagem inteligente e agendamento psicológico **HopeMind** (React + NestJS + PostgreSQL + Prisma).
+**Padrão Corporativo SafeMindLive** para a plataforma web PWA de triagem inteligente e agendamento psicológico **HopeMind** (React + NestJS + MariaDB + Prisma).
 
 ---
 
-## Pilares de Qualidade & Arquitetura (Modelo Prottus)
+## Pilares de Qualidade & Arquitetura (SafeMindLive)
 
 | Pilar | Implementação no HopeMind | Documentação |
 |-------|---------------------------|--------------|
 | **Segurança** | Cookies `httpOnly` (JWT access + refresh), Helmet, Throttler rate limit, secrets no `.env` | [`docs/projeto/seguranca.md`](docs/projeto/seguranca.md) |
 | **Escalabilidade** | Paginação, filtros de busca, DTOs com `class-validator`, estatísticas de Match % | [`docs/projeto/escalabilidade.md`](docs/projeto/escalabilidade.md) |
 | **Domínio Claro** | `users`, `patients`, `psychologists`, `triage_questions`, `appointments`, `audit_logs` (Código em EN, UI em PT-BR) | [`docs/projeto/mapa-entidades.md`](docs/projeto/mapa-entidades.md) |
-| **Banco Operacional** | PostgreSQL local com Prisma ORM, migrations e seed demonstrativo | [`backend/prisma/schema.prisma`](backend/prisma/schema.prisma) |
-| **Design System** | Variáveis CSS `--brand-primary`, densidade de controles 32px, ícones vetoriais sem emojis | [`docs/prottus/design-system.md`](docs/prottus/design-system.md) |
+| **Banco Operacional** | MariaDB / MySQL local com Prisma ORM, migrations e seed demonstrativo | [`backend/prisma/schema.prisma`](backend/prisma/schema.prisma) |
+| **Design System** | Variáveis CSS `--brand-primary`, densidade de controles 32px, ícones vetoriais sem emojis | [`docs/safemindlive/design-system.md`](docs/safemindlive/design-system.md) |
 
 ---
 
@@ -28,50 +28,26 @@
 
 ---
 
-## Como Rodar Localmente
+## Como Rodar Localmente (Comando Único)
 
-### Pré-requisitos
-- Node.js (v18+)
-- MariaDB / MySQL rodando em `127.0.0.1:3306`
-
-### 1. Instalar Dependências
+### 1. Iniciar o Ambiente de Desenvolvimento (Backend + Frontend)
+Basta rodar **um único comando** na raiz do projeto:
 ```bash
-npm run install:all
+npm run dev
 ```
+- **Frontend SPA**: `http://localhost:5173`
+- **Backend API**: `http://localhost:3000/api`
+- **Swagger Docs**: `http://localhost:3000/api/docs`
 
-### 2. Configurar Variáveis de Ambiente
-Copie o arquivo `.env.example` para `.env` e `backend/.env`:
-```bash
-cp .env.example .env
-cp .env.example backend/.env
-```
+---
 
-### 3. Gerar Prisma Client & Seed
-```bash
-cd backend
-npx prisma generate
-npx prisma db push
-npx prisma db seed
-```
+## Outros Comandos Úteis
 
-### 4. Iniciar Servidores de Desenvolvimento
-```bash
-# Terminal 1 — Backend NestJS API (http://localhost:3000/api)
-npm run dev:api
-
-# Terminal 2 — Frontend React SPA (http://localhost:5173)
-npm run dev:web
-```
-
-| Serviço | URL |
-|---------|-----|
-| Frontend SPA | http://localhost:5173 |
-| API NestJS | http://localhost:3000/api |
-| Documentação Swagger | http://localhost:3000/api/docs |
-
-### Usuários de Teste (Seed Local)
-- **Paciente Demo**: `paciente@hopemind.local` / `hopemind123`
-- **Psicólogo Demo**: `rafael@hopemind.local` / `hopemind123`
+| Comando | Descrição |
+|---------|-----------|
+| `npm run setup` | Atualiza o schema no MariaDB e roda os dados demonstrativos |
+| `npm run build` | Compila o backend NestJS e o frontend React para produção |
+| `npm run install:all` | Instala as dependências da raiz, backend e frontend |
 
 ---
 
@@ -79,16 +55,17 @@ npm run dev:web
 
 ```text
 hopemind/
-├── backend/          # API REST NestJS + Prisma ORM
-│   ├── prisma/       # Schema e Seed em PostgreSQL
-│   └── src/          # Módulos: auth, users, patients, psychologists, triage, appointments
-├── frontend/         # SPA React + Vite + TypeScript (PWA)
-│   └── src/          # Design System Prottus, componentes, contextos e páginas
-├── database/         # Scripts de banco de dados
-├── docs/             # Documentação técnica e metodologia Prottus
-│   ├── prottus/      # Padrões empresa (Design System, Metodologia)
-│   └── projeto/      # Decisões do produto HopeMind (Arquitetura, Domínio, Segurança)
-├── .cursor/          # Regras, agentes e habilidades da Prottus
-├── .env.example      # Variáveis de ambiente padrão
-└── package.json      # Scripts de orquestração do monorepo
+├── .antigravity/        # Regras e instruções SafeMindLive para o Agente Antigravity
+├── .env                 # Variáveis de ambiente locais (MariaDB, JWT, Portas)
+├── .env.example         # Exemplo de configuração para novos desenvolvedores
+├── README.md            # Documentação técnica oficial do HopeMind
+├── package.json         # Scripts de orquestração (npm run dev unificado)
+├── backend/             # API REST NestJS + Prisma ORM
+│   ├── prisma/          # Schema MariaDB (schema.prisma) e Seed (seed.ts)
+│   └── src/             # Módulos: auth, users, patients, psychologists, triage, appointments
+├── frontend/            # SPA React + Vite + TypeScript
+│   └── src/             # Design System SafeMindLive, componentes, contextos e páginas
+└── docs/                # Documentação técnica e metodologia SafeMindLive
+    ├── safemindlive/    # Metodologia e Design System corporativo da SafeMindLive
+    └── projeto/         # Arquitetura, mapa de entidades e segurança do HopeMind
 ```
