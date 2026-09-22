@@ -22,7 +22,7 @@
 |--------|------------|
 | Frontend | React 18 · Vite · TypeScript (SPA / PWA) |
 | Backend | NestJS · TypeScript (Modular Monolith REST API) |
-| Banco de Dados | PostgreSQL local + Prisma ORM |
+| Banco de Dados | MariaDB / MySQL local + Prisma ORM |
 | Autenticação | JWT Access Token (15m) + Refresh Token (7d) em cookies **httpOnly** |
 | Documentação API | Swagger UI (`/api/docs`) |
 
@@ -32,7 +32,7 @@
 
 ### Pré-requisitos
 - Node.js (v18+)
-- PostgreSQL rodando em `127.0.0.1:5432`
+- MariaDB / MySQL rodando em `127.0.0.1:3306`
 
 ### 1. Instalar Dependências
 ```bash
