@@ -39,22 +39,31 @@ export const LoginPage: React.FC = () => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px',
+        padding: '32px 20px',
       }}
     >
-      <div className="card" style={{ width: '100%', maxWidth: '420px', padding: '28px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <img
-            src="/images/logo-hopemind-full.png"
-            alt="HopeMind Logo"
-            style={{ maxHeight: '60px', width: 'auto', marginBottom: '12px', objectFit: 'contain' }}
-            onError={(e) => {
-              (e.target as HTMLElement).style.display = 'none';
-            }}
-          />
-          <h1 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--brand-primary)', marginBottom: '4px' }}>
-            HopeMind
-          </h1>
+      {/* Big HopeMind Logo OUTSIDE the Card */}
+      <div style={{ marginBottom: '24px', textAlign: 'center' }}>
+        <img
+          src="/images/logo-hopemind-full.png"
+          alt="HopeMind Logo"
+          style={{
+            maxHeight: '130px',
+            maxWidth: '380px',
+            width: '100%',
+            height: 'auto',
+            objectFit: 'contain',
+            filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.06))',
+          }}
+        />
+      </div>
+
+      {/* Login Card Block */}
+      <div className="card" style={{ width: '100%', maxWidth: '420px', padding: '32px', boxShadow: '0 6px 18px rgba(0,0,0,0.06)' }}>
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>
+            Acesse sua Conta
+          </h2>
           <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
             Plataforma de Saúde Mental & Triagem Inteligente
           </p>
@@ -109,7 +118,7 @@ export const LoginPage: React.FC = () => {
             type="submit"
             className="btn btn-primary"
             disabled={loading}
-            style={{ width: '100%', marginTop: '14px', height: '36px', fontSize: '14px' }}
+            style={{ width: '100%', marginTop: '16px', height: '38px', fontSize: '14px', fontWeight: '600' }}
           >
             {loading ? 'Entrando...' : 'Entrar na Plataforma'}
           </button>
@@ -123,13 +132,15 @@ export const LoginPage: React.FC = () => {
         </div>
       </div>
 
-      {/* SafeMindLive Branding Footer */}
-      <div style={{ marginTop: '24px', display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.85 }}>
-        <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Desenvolvido por</span>
+      {/* SafeMindLive Branding Footer (Below Card) */}
+      <div style={{ marginTop: '28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+        <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '500' }}>
+          Desenvolvido por
+        </span>
         <img
           src="/images/safe-mind-live-logo.png"
           alt="SafeMindLive Logo"
-          style={{ height: '24px', width: 'auto', objectFit: 'contain' }}
+          style={{ height: '52px', width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.04))' }}
         />
       </div>
     </div>
