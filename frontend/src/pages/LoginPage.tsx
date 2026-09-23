@@ -24,7 +24,8 @@ export const LoginPage: React.FC = () => {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao realizar login. Verifique suas credenciais.');
+      const msg = err.response?.data?.message || err.response?.data?.error || err.message || 'Erro ao realizar login. Verifique suas credenciais.';
+      setError(Array.isArray(msg) ? msg.join(', ') : msg);
     } finally {
       setLoading(false);
     }
