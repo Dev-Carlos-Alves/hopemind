@@ -51,6 +51,18 @@ model User {
   gender       String   @db.VarChar(50)
   userType     UserType @default(PATIENT) @map("user_type")
   isActive     Boolean  @default(true) @map("is_active")
+
+  // Endereço resolvido pelo CEP (ViaCEP/BrasilAPI + OpenStreetMap). Para o psicólogo é o
+  // consultório; para o paciente, só serve para calcular a distância no match.
+  cep           String?  @db.VarChar(9)
+  street        String?  @db.VarChar(255)
+  addressNumber String?  @map("address_number") @db.VarChar(20)
+  neighborhood  String?  @db.VarChar(120)
+  city          String?  @db.VarChar(120)
+  state         String?  @db.VarChar(2)
+  latitude      Float?
+  longitude     Float?
+
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 

@@ -3,9 +3,12 @@ import {
   ageGroup,
   computeScore,
   findMatches,
+  formatKm,
   hardFilter,
+  Location,
   normalizeCity,
   PatientProfile,
+  proximity,
   PsychologistProfile,
   scoreComponents,
   similarity,
@@ -14,6 +17,12 @@ import {
 import { evaluateSafety } from './safety';
 
 const NOW_ADULT = new Date('1996-04-10');
+
+// Neighborhood centres in Recife (the same coordinates the seed uses).
+const GRACAS: Location = { city: 'Recife', neighborhood: 'Graças', latitude: -8.04517, longitude: -34.90077 };
+const ESPINHEIRO: Location = { city: 'Recife', neighborhood: 'Espinheiro', latitude: -8.04287, longitude: -34.89128 };
+const BOA_VIAGEM: Location = { city: 'Recife', neighborhood: 'Boa Viagem', latitude: -8.1235, longitude: -34.9034 };
+const CAMPINAS: Location = { city: 'Campinas', neighborhood: 'Cambuí', latitude: -22.8942, longitude: -47.0514 };
 
 const patientAnswers = (overrides: Answers = {}): Answers =>
   sanitizeAnswers(PATIENT_QUESTIONNAIRE, {
@@ -36,17 +45,23 @@ const psyAnswers = (overrides: Answers = {}): Answers =>
     ...overrides,
   });
 
-const patient = (answers = patientAnswers(), safetyLevel: PatientProfile['safetyLevel'] = 'NONE'): PatientProfile => ({
+const patient = (
+  answers = patientAnswers(),
+  safetyLevel: PatientProfile['safetyLevel'] = 'NONE',
+  location: Location | null = GRACAS,
+): PatientProfile => ({
   answers,
   birthDate: NOW_ADULT,
   safetyLevel,
+  location,
 });
 
-const psy = (id: number, answers = psyAnswers(), gender = 'Feminino'): PsychologistProfile => ({
+const psy = (id: number, answers = psyAnswers(), gender = 'Feminino', location: Location | null = ESPINHEIRO): PsychologistProfile => ({
   id,
   answers,
   gender,
   birthDate: new Date('1985-01-01'),
+  location,
 });
 
 describe('similarity (section 7)', () => {
@@ -65,18 +80,25 @@ describe('weights (section 6)', () => {
 
 describe('hard filters', () => {
   it('excludes when modality is incompatible', () => {
-    expect(hardFilter(patient(), psy(1, psyAnswers({ S14: ['presencial'], S15: 'São Paulo' })))).toBe('modalidade');
+    expect(hardFilter(patient(), psy(1, psyAnswers({ S14: ['presencial'] })))).toBe('modalidade');
   });
 
-  it('requires same city for in-person care, ignoring accents and case', () => {
-    const p = patient(patientAnswers({ P20: 'presencial', P20A: 'sao paulo' }));
-    expect(hardFilter(p, psy(1, psyAnswers({ S14: ['presencial'], S15: 'São Paulo' })))).toBeNull();
-    expect(hardFilter(p, psy(2, psyAnswers({ S14: ['presencial'], S15: 'Campinas' })))).toBe('regiao');
+  it('requires the office to be within reach for in-person care', () => {
+    const p = patient(patientAnswers({ P20: 'presencial' }));
+    expect(hardFilter(p, psy(1, psyAnswers({ S14: ['presencial'] })))).toBeNull();
+    expect(hardFilter(p, psy(2, psyAnswers({ S14: ['presencial'] }), 'Feminino', CAMPINAS))).toBe('regiao');
+  });
+
+  it('falls back to the same city when an address has no coordinates', () => {
+    const p = patient(patientAnswers({ P20: 'presencial' }), 'NONE', { city: 'recife' });
+    expect(hardFilter(p, psy(1, psyAnswers({ S14: ['presencial'] })))).toBeNull();
+    expect(hardFilter(p, psy(2, psyAnswers({ S14: ['presencial'] }), 'Feminino', { city: 'Olinda' }))).toBe('regiao');
+    expect(hardFilter({ ...p, location: null }, psy(3, psyAnswers({ S14: ['presencial'] })))).toBe('regiao');
     expect(normalizeCity('  São  Paulo ')).toBe('sao paulo');
   });
 
   it('accepts "tanto faz" with an online-only professional', () => {
-    const p = patient(patientAnswers({ P20: 'tanto_faz', P20A: 'Recife' }));
+    const p = patient(patientAnswers({ P20: 'tanto_faz' }), 'NONE', null);
     expect(hardFilter(p, psy(1))).toBeNull();
   });
 
@@ -145,11 +167,54 @@ describe('components', () => {
   });
 });
 
+describe('distance (localizacao)', () => {
+  const inPerson = () => psyAnswers({ S14: ['presencial'] });
+
+  it('scores a nearby office higher than a distant one for in-person patients', () => {
+    const p = patient(patientAnswers({ P20: 'presencial' }));
+    const near = scoreComponents(p, psy(1, inPerson(), 'Feminino', ESPINHEIRO));
+    const far = scoreComponents(p, psy(2, inPerson(), 'Feminino', BOA_VIAGEM));
+    expect(near.distanceKm).toBeCloseTo(1.1, 1);
+    expect(far.distanceKm).toBeGreaterThan(8);
+    expect(near.components.localizacao).toBe(1);
+    expect(far.components.localizacao).toBeLessThan(0.6);
+  });
+
+  it('ignores distance for online patients but still reports it', () => {
+    const r = scoreComponents(patient(), psy(1, psyAnswers(), 'Feminino', BOA_VIAGEM));
+    expect(r.components.localizacao).toBe(1);
+    expect(r.distanceKm).toBeGreaterThan(8);
+  });
+
+  it('prefers a close office over online-only when the patient accepts both', () => {
+    const p = patient(patientAnswers({ P20: 'tanto_faz' }));
+    const hybridNear = scoreComponents(p, psy(1, psyAnswers({ S14: ['online', 'presencial'] }))).components.localizacao;
+    const onlineOnly = scoreComponents(p, psy(2)).components.localizacao;
+    expect(hybridNear).toBe(1);
+    expect(onlineOnly).toBe(0.8);
+  });
+
+  it('decays proximity linearly and formats distances in Portuguese', () => {
+    expect(proximity(1)).toBe(1);
+    expect(proximity(12)).toBeCloseTo(0.3);
+    expect(proximity(40)).toBe(0.3);
+    expect(proximity(null)).toBe(0.6);
+    expect(formatKm(0.4)).toBe('menos de 1 km');
+    expect(formatKm(3.25)).toBe('3,3 km');
+  });
+
+  it('explains where the office is', () => {
+    const p = patient(patientAnswers({ P20: 'presencial' }));
+    const { results } = findMatches(p, [psy(1, inPerson())]);
+    expect(results[0].reasons).toContain('Consultório em Espinheiro, a 1,1 km de você');
+  });
+});
+
 describe('findMatches (section 8)', () => {
   it('ranks by score, counts exclusions and explains every result', () => {
     const close = psy(1);
     const far = psy(2, psyAnswers({ S03: ['luto'], S04: { luto: 5 }, S06: 1, S07: 1, S08: 1, S09: 1, S11: 1, S21: 1 }));
-    const excluded = psy(3, psyAnswers({ S14: ['presencial'], S15: 'Manaus' }));
+    const excluded = psy(3, psyAnswers({ S14: ['presencial'] }));
 
     const { results, excluded: why } = findMatches(patient(), [far, excluded, close]);
 
@@ -170,9 +235,8 @@ describe('sanitizeAnswers', () => {
     expect(() => patientAnswers({ P01: ['ansiedade', 'trabalho', 'sono', 'luto'] })).toThrow(/no máximo 3/);
   });
 
-  it('requires the city only when in-person care is possible, and drops hidden answers', () => {
-    expect(() => patientAnswers({ P20: 'presencial' })).toThrow(/P20A/);
-    expect(patientAnswers({ P20: 'online', P20A: 'Recife' }).P20A).toBeUndefined();
+  it('drops answers to questions that are not in the questionnaire (e.g. the old city field)', () => {
+    expect(patientAnswers({ P20: 'presencial', P20A: 'Recife' }).P20A).toBeUndefined();
   });
 
   it('keeps "sem preferência" exclusive', () => {

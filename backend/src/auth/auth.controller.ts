@@ -1,11 +1,11 @@
-import { Body, Controller, Get, HttpCode, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Patch, Post, Req, Res } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { ACCESS_COOKIE, ACCESS_TTL_MS, REFRESH_COOKIE, REFRESH_TTL_MS, cookieOptions } from './auth.config';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
-import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { LoginDto, RegisterDto, UpdateAddressDto } from './dto/auth.dto';
 
 const AUTH_THROTTLE = { default: { limit: 5, ttl: 60_000 } };
 
@@ -57,6 +57,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Retorna os dados do usuário autenticado' })
   getProfile(@Req() req: any) {
     return this.authService.getProfile(req.user.sub);
+  }
+
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Patch('me/address')
+  @ApiOperation({ summary: 'Atualiza o endereço a partir do CEP (usado na distância do match)' })
+  updateAddress(@Req() req: any, @Body() body: UpdateAddressDto) {
+    return this.authService.updateAddress(req.user.sub, body);
   }
 
   private setSessionCookies(response: Response, accessToken: string, refreshToken: string) {

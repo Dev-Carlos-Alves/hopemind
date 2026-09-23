@@ -15,6 +15,11 @@ import {
 } from 'class-validator';
 
 const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value);
+const onlyDigits = ({ value }: { value: unknown }) => {
+  if (typeof value !== 'string') return value;
+  const digits = value.replace(/\D/g, '');
+  return digits === '' ? undefined : digits;
+};
 
 export class LoginDto {
   @Transform(trim)
@@ -99,4 +104,27 @@ export class RegisterDto {
   @IsNumber({}, { message: 'Valor da sessão inválido.' })
   @Min(0)
   sessionFee?: number;
+
+  @IsOptional()
+  @Transform(onlyDigits)
+  @Matches(/^\d{8}$/, { message: 'CEP deve ter 8 dígitos.' })
+  cep?: string;
+
+  @IsOptional()
+  @Transform(trim)
+  @IsString()
+  @MaxLength(20, { message: 'Número muito longo.' })
+  addressNumber?: string;
+}
+
+export class UpdateAddressDto {
+  @Transform(onlyDigits)
+  @Matches(/^\d{8}$/, { message: 'CEP deve ter 8 dígitos.' })
+  cep: string;
+
+  @IsOptional()
+  @Transform(trim)
+  @IsString()
+  @MaxLength(20, { message: 'Número muito longo.' })
+  addressNumber?: string;
 }

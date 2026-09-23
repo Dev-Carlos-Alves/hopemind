@@ -131,7 +131,7 @@ export const AppointmentsPage: React.FC = () => {
             action={
               tab === 'upcoming' &&
               !isPsychologist && (
-                <Link to="/dashboard" className="btn btn--filled">
+                <Link to="/matches" className="btn btn--filled">
                   Ver recomendações
                 </Link>
               )

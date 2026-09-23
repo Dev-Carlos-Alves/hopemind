@@ -4,8 +4,9 @@ import { AppShell } from './components/AppShell';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { AppointmentsPage } from './pages/AppointmentsPage';
+import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
-import { PatientDashboardPage } from './pages/PatientDashboardPage';
+import { MatchesPage } from './pages/MatchesPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { TriagePage } from './pages/TriagePage';
@@ -22,10 +23,9 @@ const ProtectedLayout: React.FC = () => {
   return <AppShell />;
 };
 
-const HomeRoute: React.FC = () => {
+const PatientOnly: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const { user } = useAuth();
-  if (user?.userType === 'PSYCHOLOGIST') return <Navigate to="/consultas" replace />;
-  return <PatientDashboardPage />;
+  return user?.userType === 'PSYCHOLOGIST' ? <Navigate to="/inicio" replace /> : children;
 };
 
 export const AppRoutes: React.FC = () => {
@@ -35,17 +35,20 @@ export const AppRoutes: React.FC = () => {
 
   return (
     <Routes>
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
-      <Route path="/registro" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegisterPage />} />
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/inicio" replace /> : <LoginPage />} />
+      <Route path="/registro" element={isAuthenticated ? <Navigate to="/inicio" replace /> : <RegisterPage />} />
 
       <Route element={<ProtectedLayout />}>
-        <Route path="/dashboard" element={<HomeRoute />} />
+        <Route path="/inicio" element={<HomePage />} />
+        <Route path="/matches" element={<PatientOnly><MatchesPage /></PatientOnly>} />
         <Route path="/triagem" element={<TriagePage />} />
+        {/* Old addresses from before the Home/Matches split. */}
+        <Route path="/dashboard" element={<Navigate to="/inicio" replace />} />
         <Route path="/consultas" element={<AppointmentsPage />} />
         <Route path="/configuracoes" element={<SettingsPage />} />
       </Route>
 
-      <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
+      <Route path="*" element={<Navigate to={isAuthenticated ? '/inicio' : '/login'} replace />} />
     </Routes>
   );
 };

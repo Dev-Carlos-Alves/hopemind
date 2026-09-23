@@ -7,12 +7,14 @@ import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { TriageModule } from './triage/triage.module';
 import { AppointmentsModule } from './appointments/appointments.module';
+import { GeoModule } from './geo/geo.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
     PrismaModule,
+    GeoModule,
     AuthModule,
     TriageModule,
     AppointmentsModule,

@@ -10,7 +10,7 @@ const importance = { minLabel: 'Nada importante', maxLabel: 'Muito importante' }
  */
 export const PATIENT_QUESTIONNAIRE: Questionnaire = {
   audience: 'PATIENT',
-  version: 'hm-paciente-2026.1',
+  version: 'hm-paciente-2026.2',
   sections: [
     {
       id: 'demanda',
@@ -279,6 +279,7 @@ export const PATIENT_QUESTIONNAIRE: Questionnaire = {
           variable: 'modalidade',
           type: 'single',
           prompt: 'Qual modalidade você prefere?',
+          help: 'Para o presencial, usamos o CEP do seu cadastro para calcular a distância até cada consultório.',
           required: true,
           usage: 'filtro',
           options: [
@@ -286,17 +287,6 @@ export const PATIENT_QUESTIONNAIRE: Questionnaire = {
             { value: 'presencial', label: 'Presencial' },
             { value: 'tanto_faz', label: 'Tanto faz' },
           ],
-        },
-        {
-          code: 'P20A',
-          variable: 'cidade',
-          type: 'text',
-          prompt: 'Em qual cidade você prefere o atendimento presencial?',
-          help: 'Usamos só para encontrar profissionais na sua região.',
-          required: true,
-          usage: 'filtro',
-          maxLength: 80,
-          showIf: { code: 'P20', in: ['presencial', 'tanto_faz'] },
         },
         {
           code: 'P21',

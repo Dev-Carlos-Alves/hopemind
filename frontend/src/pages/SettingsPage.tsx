@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AddressCard } from '../components/AddressCard';
 import { Icon, IconName } from '../components/Icon';
 import { Avatar, PageHeader, Segmented, Skeleton } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
@@ -92,6 +93,15 @@ export const SettingsPage: React.FC = () => {
           </div>
         </section>
 
+        <AddressCard
+          title={isPsychologist ? 'Consultório' : 'Endereço'}
+          footer={
+            isPsychologist
+              ? 'Usado para calcular a distância até os pacientes. Eles veem só o bairro.'
+              : 'Usado só para calcular a distância até cada consultório nos seus matches.'
+          }
+        />
+
         {isPsychologist && profile?.psychologist && (
           <section className="group">
             <h3 className="group__header">Registro profissional</h3>
@@ -123,11 +133,11 @@ export const SettingsPage: React.FC = () => {
         <section className="group">
           <h3 className="group__header">{isPsychologist ? 'Atendimento' : 'Seu perfil'}</h3>
           <div className="group__body">
-            <Link to="/triagem" className="list-row list-row--button" style={{ '--row-inset': '58px' } as React.CSSProperties}>
+            <Link to={isPsychologist ? '/triagem' : '/matches?questionario=1'} className="list-row list-row--button" style={{ '--row-inset': '58px' } as React.CSSProperties}>
               <span className="list-row__icon" style={{ background: '#3a7733' }}>
                 <Icon name="clipboard" size={17} strokeWidth={2} />
               </span>
-              <span className="list-row__label">{isPsychologist ? 'Perfil de atendimento' : 'Refazer questionário'}</span>
+              <span className="list-row__label">{isPsychologist ? 'Perfil de atendimento' : 'Meu questionário'}</span>
               <Icon name="chevron-right" size={18} className="list-row__chevron" />
             </Link>
           </div>

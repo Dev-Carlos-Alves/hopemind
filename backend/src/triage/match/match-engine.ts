@@ -1,3 +1,4 @@
+import { distanceKm, hasCoords } from '../../geo/distance';
 import { DEMANDS, labelOf } from '../questionnaire/catalog';
 import { Answers } from '../questionnaire';
 import { isRiskLevel, SafetyLevelCode } from './safety';
@@ -6,16 +7,20 @@ import { isRiskLevel, SafetyLevelCode } from './safety';
  * Deterministic, explainable matching — sections 2, 6, 7 and 8 of
  * "HopeMind_Formularios_e_Algoritmo_de_Match". Weights are prototype parameters
  * (not validated science) and must be revisited with the clinical team.
+ *
+ * 1.1.0: location comes from the CEP on the profile, and the distance to the office
+ * is part of the score (component "localizacao").
  */
-export const ALGORITHM_VERSION = 'hm-match-1.0.0';
+export const ALGORITHM_VERSION = 'hm-match-1.1.0';
 
 export const WEIGHTS = {
   demanda: 0.25,
-  estilo: 0.2,
-  experiencia: 0.15,
-  relacao: 0.15,
+  estilo: 0.18,
+  experiencia: 0.14,
+  relacao: 0.13,
   disponibilidade: 0.1,
-  modalidade: 0.1,
+  // Modalidade + distância até o consultório.
+  localizacao: 0.15,
   preferencias: 0.05,
 } as const;
 
@@ -24,10 +29,19 @@ export type AgeGroup = 'criancas' | 'adolescentes' | 'adultos' | 'idosos';
 
 export type ExclusionReason = 'modalidade' | 'regiao' | 'faixa_etaria' | 'demanda_nao_atendida' | 'sem_horario' | 'protocolo_seguranca';
 
+/** Address resolved from the CEP on the user's profile. */
+export interface Location {
+  city?: string | null;
+  neighborhood?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
 export interface PatientProfile {
   answers: Answers;
   birthDate: Date;
   safetyLevel: SafetyLevelCode;
+  location?: Location | null;
 }
 
 export interface PsychologistProfile {
@@ -35,6 +49,7 @@ export interface PsychologistProfile {
   answers: Answers;
   gender: string;
   birthDate: Date;
+  location?: Location | null;
 }
 
 export interface MatchResult {
@@ -42,6 +57,8 @@ export interface MatchResult {
   score: number;
   band: 'alta' | 'boa' | 'possivel';
   components: Record<Component, number>;
+  /** Straight-line distance to the office, when both addresses have coordinates. */
+  distanceKm: number | null;
   reasons: string[];
   considerations: string[];
 }
@@ -115,6 +132,34 @@ const PRACTICE_SCORE: Record<string, number> = { lt1: 0, '1-3': 0.25, '3-5': 0.5
 const RESISTANCE_TO_DIRECTION: Record<string, number> = { nao_insistir: 1, perguntar_suavemente: 2, incentivar: 4, ser_direto: 5 };
 const RELATION_TO_WARMTH: Record<string, number> = { objetiva: 2, profissional_acolhedora: 3.5, muito_acolhedora: 5 };
 
+/* ───────────── location ───────────── */
+
+/** Farther than this, in-person care is not considered viable. */
+export const MAX_IN_PERSON_KM = 25;
+
+export function distanceBetween(a?: Location | null, b?: Location | null): number | null {
+  if (!hasCoords(a) || !hasCoords(b)) return null;
+  return Math.round(distanceKm(a, b) * 10) / 10;
+}
+
+/** Whether the patient can reach the office: by distance when known, otherwise same city. */
+export function withinReach(patient: PatientProfile, psy: PsychologistProfile) {
+  const km = distanceBetween(patient.location, psy.location);
+  if (km !== null) return { ok: km <= MAX_IN_PERSON_KM, km };
+  const a = text(patient.location?.city);
+  const b = text(psy.location?.city);
+  return { ok: !!a && !!b && normalizeCity(a) === normalizeCity(b), km: null };
+}
+
+/** 1 up to 1.5 km, falling linearly to 0.3 at 12 km (roughly crossing Recife). Unknown distance = 0.6. */
+export function proximity(km: number | null) {
+  if (km === null) return 0.6;
+  if (km <= 1.5) return 1;
+  return Math.max(0.3, 1 - (0.7 * (km - 1.5)) / 10.5);
+}
+
+export const formatKm = (km: number) => (km < 1 ? 'menos de 1 km' : `${km.toFixed(1).replace('.', ',')} km`);
+
 /* ───────────── hard filters (section 6) ───────────── */
 
 export function hardFilter(patient: PatientProfile, psy: PsychologistProfile): ExclusionReason | null {
@@ -122,9 +167,9 @@ export function hardFilter(patient: PatientProfile, psy: PsychologistProfile): E
   const s = psy.answers;
 
   const psyModes = list(s.S14);
-  const sameCity = !!text(p.P20A) && normalizeCity(text(p.P20A)) === normalizeCity(text(s.S15));
   const online = psyModes.includes('online');
   const inPerson = psyModes.includes('presencial');
+  const reachable = inPerson && withinReach(patient, psy).ok;
 
   switch (p.P20) {
     case 'online':
@@ -132,10 +177,10 @@ export function hardFilter(patient: PatientProfile, psy: PsychologistProfile): E
       break;
     case 'presencial':
       if (!inPerson) return 'modalidade';
-      if (!sameCity) return 'regiao';
+      if (!reachable) return 'regiao';
       break;
     default:
-      if (!online && !(inPerson && sameCity)) return inPerson ? 'regiao' : 'modalidade';
+      if (!online && !reachable) return inPerson ? 'regiao' : 'modalidade';
   }
 
   if (!list(s.S02).includes(ageGroup(patient.birthDate))) return 'faixa_etaria';
@@ -202,9 +247,14 @@ export function scoreComponents(patient: PatientProfile, psy: PsychologistProfil
   const disponibilidade = Math.min(1, commonSlots / 3);
 
   const psyModes = list(s.S14);
-  const sameCity = !!text(p.P20A) && normalizeCity(text(p.P20A)) === normalizeCity(text(s.S15));
-  const bothModes = psyModes.includes('online') && psyModes.includes('presencial') && sameCity;
-  const modalidade = p.P20 === 'tanto_faz' && !bothModes ? 0.85 : 1;
+  const reach = withinReach(patient, psy);
+  const inPersonOk = psyModes.includes('presencial') && reach.ok;
+  let localizacao = 1;
+  if (p.P20 === 'presencial') localizacao = proximity(reach.km);
+  else if (p.P20 === 'tanto_faz') {
+    // Online is a solid option; a nearby office (possibly on top of online) is better.
+    localizacao = Math.max(psyModes.includes('online') ? 0.8 : 0, inPersonOk ? 0.55 + 0.45 * proximity(reach.km) : 0);
+  }
 
   const checks: boolean[] = [];
   if (p.P17 === 'homem') checks.push(/^masc/i.test(psy.gender));
@@ -217,8 +267,10 @@ export function scoreComponents(patient: PatientProfile, psy: PsychologistProfil
   const preferencias = checks.length ? checks.filter(Boolean).length / checks.length : 1;
 
   return {
-    components: { demanda, estilo, experiencia, relacao, disponibilidade, modalidade, preferencias },
+    components: { demanda, estilo, experiencia, relacao, disponibilidade, localizacao, preferencias },
     commonSlots,
+    inPersonOk,
+    distanceKm: distanceBetween(patient.location, psy.location),
     matchedDemands: [...demands.keys()].filter((d) => psyDemands.has(d)).sort((a, b) => demands.get(b)! - demands.get(a)!),
     hasPreferences: checks.length > 0,
   };
@@ -227,7 +279,7 @@ export function scoreComponents(patient: PatientProfile, psy: PsychologistProfil
 /* ───────────── explanation (section 9) ───────────── */
 
 function explain(patient: PatientProfile, psy: PsychologistProfile, parts: ReturnType<typeof scoreComponents>) {
-  const { components: c, matchedDemands, commonSlots } = parts;
+  const { components: c, matchedDemands, commonSlots, distanceKm: km } = parts;
   const reasons: string[] = [];
   const considerations: string[] = [];
 
@@ -240,12 +292,14 @@ function explain(patient: PatientProfile, psy: PsychologistProfile, parts: Retur
   if (c.relacao >= 0.75) reasons.push('Forma de se relacionar alinhada ao que você espera');
   if (commonSlots > 0) reasons.push(commonSlots === 1 ? '1 período em comum na agenda' : `${commonSlots} períodos em comum na agenda`);
 
-  const modes = list(psy.answers.S14);
-  if (patient.answers.P20 === 'online' || (patient.answers.P20 === 'tanto_faz' && modes.includes('online'))) {
-    reasons.push('Atende online');
-  } else {
-    reasons.push(`Atende presencialmente em ${text(psy.answers.S15)}`);
-  }
+  const mode = patient.answers.P20;
+  const place = psy.location?.neighborhood || psy.location?.city || 'sua cidade';
+  const office = km === null ? `Consultório em ${place}` : `Consultório em ${place}, a ${formatKm(km)} de você`;
+  if (mode === 'online' || !parts.inPersonOk) reasons.push('Atende online');
+  else if (mode === 'tanto_faz' && list(psy.answers.S14).includes('online')) reasons.push(`${office} · também atende online`);
+  else reasons.push(office);
+  if (mode === 'presencial' && km !== null && km > 8) considerations.push(`Consultório mais distante (${formatKm(km)})`);
+
   if (parts.hasPreferences && c.preferencias === 1) reasons.push('Atende às suas preferências pessoais');
   if (matchedDemands.length === 0) considerations.push('Sem experiência declarada nas suas demandas prioritárias');
 
@@ -281,11 +335,15 @@ export function findMatches(patient: PatientProfile, psychologists: Psychologist
       score: round(score),
       band: band(score),
       components: Object.fromEntries(Object.entries(parts.components).map(([k, v]) => [k, round(v)])) as Record<Component, number>,
+      distanceKm: parts.distanceKm,
       reasons,
       considerations,
     });
   }
 
-  results.sort((a, b) => b.score - a.score || a.psychologistId - b.psychologistId);
+  // Ties go to the closer office, then to the lower id (stable, deterministic order).
+  results.sort(
+    (a, b) => b.score - a.score || (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity) || a.psychologistId - b.psychologistId,
+  );
   return { results, excluded };
 }

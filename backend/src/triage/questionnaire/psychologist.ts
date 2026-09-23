@@ -9,7 +9,7 @@ const muchLittle = { minLabel: 'Pouco', maxLabel: 'Muito' };
  */
 export const PSYCHOLOGIST_QUESTIONNAIRE: Questionnaire = {
   audience: 'PSYCHOLOGIST',
-  version: 'hm-psicologo-2026.1',
+  version: 'hm-psicologo-2026.2',
   sections: [
     {
       id: 'pratica',
@@ -193,23 +193,13 @@ export const PSYCHOLOGIST_QUESTIONNAIRE: Questionnaire = {
           variable: 'modalidade',
           type: 'multi',
           prompt: 'Em quais modalidades você atende?',
+          help: 'Para o presencial, o consultório é o CEP do seu cadastro. O paciente vê só o bairro e a distância.',
           required: true,
           usage: 'filtro',
           options: [
             { value: 'online', label: 'Online' },
             { value: 'presencial', label: 'Presencial' },
           ],
-        },
-        {
-          code: 'S15',
-          variable: 'regiao',
-          type: 'text',
-          prompt: 'Em qual cidade fica o seu consultório?',
-          help: 'O endereço completo não é exibido para o paciente.',
-          required: true,
-          usage: 'filtro',
-          maxLength: 80,
-          showIf: { code: 'S14', in: ['presencial'] },
         },
         {
           code: 'S16',

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthLayout } from '../components/AuthLayout';
+import { CepField } from '../components/CepField';
 import { Icon } from '../components/Icon';
 import { Button, PasswordField, Segmented, SelectField, TextField } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
@@ -30,6 +31,8 @@ export const RegisterPage: React.FC = () => {
     crp: '',
     specialty: '',
     sessionFee: '',
+    cep: '',
+    addressNumber: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -57,6 +60,7 @@ export const RegisterPage: React.FC = () => {
         phone: onlyDigits(form.phone),
         birthDate: form.birthDate,
         gender: form.gender,
+        ...(form.cep && { cep: onlyDigits(form.cep), addressNumber: form.addressNumber || undefined }),
         ...(isPsychologist && {
           crp: form.crp,
           specialty: form.specialty,
@@ -65,7 +69,7 @@ export const RegisterPage: React.FC = () => {
       });
       const user = await login(form.email, form.password);
       toast.success('Conta criada! Vamos montar o seu perfil.');
-      navigate(user.hasTriage ? '/dashboard' : '/triagem');
+      navigate(user.hasTriage ? '/inicio' : isPsychologist ? '/triagem' : '/matches');
     } catch (err) {
       setError(getErrorMessage(err, 'Não foi possível concluir o cadastro.'));
     } finally {
@@ -126,13 +130,23 @@ export const RegisterPage: React.FC = () => {
           <SelectField label="Gênero" value={form.gender} onChange={set('gender')} options={GENDERS} />
         </div>
 
+        <div className="field-grid">
+          <CepField
+            label={isPsychologist ? 'CEP do consultório' : 'CEP'}
+            value={form.cep}
+            onChange={(cep) => setForm((f) => ({ ...f, cep }))}
+            hint={isPsychologist ? 'Pacientes veem só o bairro e a distância.' : 'Para calcular a distância até cada consultório.'}
+          />
+          <TextField label="Número (opcional)" value={form.addressNumber} onChange={set('addressNumber')} maxLength={20} />
+        </div>
+
         {isPsychologist && (
           <div className="stack gap-3 animate-rise">
             <p className="group__header" style={{ padding: '8px 4px 0' }}>
               Registro profissional
             </p>
             <div className="field-grid">
-              <TextField label="CRP" value={form.crp} onChange={set('crp')} hint="Ex.: CRP 06/123456" required />
+              <TextField label="CRP" value={form.crp} onChange={set('crp')} hint="Ex.: CRP 02/123456" required />
               <TextField
                 label="Valor da sessão (R$)"
                 type="number"

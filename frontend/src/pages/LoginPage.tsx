@@ -21,7 +21,7 @@ export const LoginPage: React.FC = () => {
     setLoading(true);
     try {
       const u = await login(email, password);
-      navigate(u.hasTriage ? '/dashboard' : '/triagem');
+      navigate(u.hasTriage ? '/inicio' : u.userType === 'PSYCHOLOGIST' ? '/triagem' : '/matches');
     } catch (err) {
       setError(getErrorMessage(err, 'Não foi possível entrar. Verifique suas credenciais.'));
     } finally {

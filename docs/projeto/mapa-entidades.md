@@ -41,6 +41,8 @@ Conta de acesso (paciente, psicólogo ou admin).
 | `gender` | String | Gênero — usado só se o paciente declarar preferência (P17) |
 | `user_type` | Enum `PATIENT` · `PSYCHOLOGIST` · `ADMIN` | Papel |
 | `is_active` | Boolean | Conta ativa |
+| `cep`, `street`, `address_number`, `neighborhood`, `city`, `state` | String (opcionais) | Endereço resolvido pelo CEP. Psicólogo: consultório (paciente vê só o bairro). Paciente: só para calcular distâncias |
+| `latitude` / `longitude` | Float (opcionais) | Centro do bairro (OpenStreetMap) — distância no match |
 | `created_at` / `updated_at` | DateTime | Auditoria |
 
 ### 2. `patients`

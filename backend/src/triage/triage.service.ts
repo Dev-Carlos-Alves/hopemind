@@ -6,6 +6,8 @@ import { evaluateSafety, SUPPORT_RESOURCES } from './match/safety';
 import { AnswerValidationError, Answers, Audience, questionnaireFor, sanitizeAnswers } from './questionnaire';
 import { APPROACHES, labelOf } from './questionnaire/catalog';
 
+const LOCATION_FIELDS = { city: true, neighborhood: true, latitude: true, longitude: true } as const;
+
 interface AuthUser {
   sub: number;
   userType: 'PATIENT' | 'PSYCHOLOGIST' | 'ADMIN';
@@ -80,7 +82,7 @@ export class TriageService {
 
     const [submission, patientUser] = await Promise.all([
       this.latestSubmission(user.sub),
-      this.prisma.user.findUnique({ where: { id: user.sub }, select: { birthDate: true } }),
+      this.prisma.user.findUnique({ where: { id: user.sub }, select: { birthDate: true, ...LOCATION_FIELDS } }),
     ]);
     if (!submission) {
       throw new ConflictException('Responda o questionário para receber recomendações.');
@@ -95,6 +97,7 @@ export class TriageService {
             name: true,
             gender: true,
             birthDate: true,
+            ...LOCATION_FIELDS,
             triageSubmissions: { orderBy: { createdAt: 'desc' }, take: 1 },
           },
         },
@@ -108,10 +111,16 @@ export class TriageService {
         answers: p.user.triageSubmissions[0].answers as Answers,
         gender: p.user.gender,
         birthDate: p.user.birthDate,
+        location: p.user,
       }));
 
     const outcome = findMatches(
-      { answers: submission.answers as Answers, birthDate: patientUser!.birthDate, safetyLevel: submission.safetyLevel },
+      {
+        answers: submission.answers as Answers,
+        birthDate: patientUser!.birthDate,
+        safetyLevel: submission.safetyLevel,
+        location: patientUser,
+      },
       profiles,
     );
 
@@ -121,7 +130,7 @@ export class TriageService {
         submissionId: submission.id,
         algorithmVersion: ALGORITHM_VERSION,
         questionnaireVersion: submission.questionnaireVersion,
-        results: outcome.results.map(({ psychologistId, score, components }) => ({ psychologistId, score, components })),
+        results: outcome.results.map(({ psychologistId, score, components, distanceKm }) => ({ psychologistId, score, components, distanceKm })),
       },
     });
 
@@ -131,6 +140,9 @@ export class TriageService {
       questionnaireVersion: submission.questionnaireVersion,
       safety: this.safetyPayload(submission.safetyLevel),
       evaluated: profiles.length,
+      modality: (submission.answers as Answers).P20 ?? null,
+      // In-person matching needs the patient's address; the page asks for the CEP when it is missing.
+      location: patientUser!.city ? { neighborhood: patientUser!.neighborhood, city: patientUser!.city } : null,
       excluded: outcome.excluded,
       results: outcome.results.map((r) => {
         const p = byId.get(r.psychologistId)!;
@@ -146,7 +158,8 @@ export class TriageService {
             biography: p.biography,
             sessionFee: p.sessionFee,
             modalities: (psyAnswers.S14 as string[]) ?? [],
-            city: (psyAnswers.S15 as string) || null,
+            neighborhood: p.user.neighborhood,
+            city: p.user.city,
           },
         };
       }),

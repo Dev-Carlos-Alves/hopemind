@@ -2,9 +2,21 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { JwtService } from '@nestjs/jwt';
 import { UserType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { CepService } from '../geo/cep.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { accessSecret, refreshSecret } from './auth.config';
-import { RegisterDto } from './dto/auth.dto';
+import { RegisterDto, UpdateAddressDto } from './dto/auth.dto';
+
+const ADDRESS_FIELDS = {
+  cep: true,
+  street: true,
+  addressNumber: true,
+  neighborhood: true,
+  city: true,
+  state: true,
+  latitude: true,
+  longitude: true,
+} as const;
 
 export interface JwtPayload {
   sub: number;
@@ -20,7 +32,28 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private cepService: CepService,
   ) {}
+
+  /** Coordinates are always resolved on the server; the client only sends the CEP. */
+  private async resolveAddress(cep: string, addressNumber?: string) {
+    const a = await this.cepService.lookup(cep);
+    return {
+      cep: a.cep,
+      street: a.street,
+      addressNumber: addressNumber || null,
+      neighborhood: a.neighborhood,
+      city: a.city,
+      state: a.state,
+      latitude: a.latitude,
+      longitude: a.longitude,
+    };
+  }
+
+  async updateAddress(userId: number, data: UpdateAddressDto) {
+    const address = await this.resolveAddress(data.cep, data.addressNumber);
+    return this.prisma.user.update({ where: { id: userId }, data: address, select: ADDRESS_FIELDS });
+  }
 
   async register(data: RegisterDto) {
     const existingUser = await this.prisma.user.findFirst({
@@ -39,8 +72,11 @@ export class AuthService {
       }
     }
 
+    const address = data.cep ? await this.resolveAddress(data.cep, data.addressNumber) : {};
+
     const user = await this.prisma.user.create({
       data: {
+        ...address,
         email: data.email.toLowerCase(),
         passwordHash: await bcrypt.hash(data.password, 10),
         name: data.name,
@@ -135,6 +171,7 @@ export class AuthService {
         birthDate: true,
         gender: true,
         userType: true,
+        ...ADDRESS_FIELDS,
         patient: { select: { id: true, mainComplaint: true } },
         psychologist: {
           select: {

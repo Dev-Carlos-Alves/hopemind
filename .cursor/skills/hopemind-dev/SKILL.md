@@ -29,4 +29,4 @@ Contas demo (senha `hopemind123`): `paciente@hopemind.local`, `rafael@hopemind.l
 ## Mudar pesos ou regras do match
 1. `WEIGHTS` / `hardFilter` / `band` em `match-engine.ts`
 2. Subir `ALGORITHM_VERSION`
-3. Atualizar os testes e o texto "Como calculamos" em `frontend/src/pages/PatientDashboardPage.tsx`
+3. Atualizar os testes e o texto "Como calculamos" em `frontend/src/pages/MatchesPage.tsx` (e a lista de fatores em `HomePage.tsx`)

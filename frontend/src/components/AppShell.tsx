@@ -12,13 +12,14 @@ interface NavEntry {
 }
 
 const PATIENT_NAV: NavEntry[] = [
-  { to: '/dashboard', label: 'Para você', short: 'Início', icon: 'sparkles' },
+  { to: '/inicio', label: 'Home', short: 'Home', icon: 'home' },
   { to: '/consultas', label: 'Minhas sessões', short: 'Sessões', icon: 'calendar' },
-  { to: '/triagem', label: 'Meu questionário', short: 'Perfil', icon: 'clipboard' },
+  { to: '/matches', label: 'Matches', short: 'Matches', icon: 'sparkles' },
   { to: '/configuracoes', label: 'Ajustes', short: 'Ajustes', icon: 'settings' },
 ];
 
 const PSYCHOLOGIST_NAV: NavEntry[] = [
+  { to: '/inicio', label: 'Home', short: 'Home', icon: 'home' },
   { to: '/consultas', label: 'Agenda', short: 'Agenda', icon: 'calendar' },
   { to: '/triagem', label: 'Perfil de atendimento', short: 'Perfil', icon: 'clipboard' },
   { to: '/configuracoes', label: 'Ajustes', short: 'Ajustes', icon: 'settings' },
@@ -39,7 +40,7 @@ export const AppShell: React.FC = () => {
   return (
     <div className="shell">
       <aside className="sidebar" aria-label="Navegação principal">
-        <Link to="/" className="sidebar__brand">
+        <Link to="/inicio" className="sidebar__brand">
           <img src="/images/emblema.png" alt="" />
           <span className="sidebar__wordmark">
             <Wordmark />
@@ -74,7 +75,7 @@ export const AppShell: React.FC = () => {
       </aside>
 
       <header className="topbar">
-        <Link to="/" className="topbar__brand">
+        <Link to="/inicio" className="topbar__brand">
           <img src="/images/emblema.png" alt="" />
           <span className="sidebar__wordmark">
             <Wordmark />

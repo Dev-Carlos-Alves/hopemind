@@ -39,7 +39,7 @@ npm run dev
 - App: http://localhost:5173
 - API: http://localhost:3000/api — Swagger em http://localhost:3000/api/docs
 
-**Já tinha o banco da versão anterior?** O modelo de dados do questionário mudou. Rode uma vez (apaga e recria o banco de desenvolvimento com os dados de demonstração):
+**Atualizando de uma versão anterior?** Rode `npm run setup` de novo: ele adiciona as colunas novas (endereço/CEP) sem apagar nada e atualiza os dados de demonstração. Se preferir começar do zero (apaga o banco de desenvolvimento):
 
 ```bash
 npm run db:reset
@@ -61,11 +61,11 @@ Senha de todas: `hopemind123`
 
 | Perfil | E-mail |
 |---|---|
-| Paciente (questionário já respondido) | `paciente@hopemind.local` |
-| Psicólogo — TCC, ansiedade/carreira, online e SP | `rafael@hopemind.local` |
-| Outros perfis variados | `roberto@`, `camila@`, `felipe@`, `juliana@`, `beatriz@`, `thiago@` `hopemind.local` |
+| Paciente — Graças (Recife), aceita online ou presencial | `paciente@hopemind.local` |
+| Psicólogo — TCC, ansiedade/carreira, Espinheiro, online e presencial | `rafael@hopemind.local` |
+| Outros 25 psicólogos | `roberto@`, `camila@`, `larissa@`, `marcelo@`, `sofia@`… `hopemind.local` (lista em `backend/prisma/seed.ts`) |
 
-Os perfis foram montados para exercitar todos os filtros: há quem atenda só presencial, só de manhã, que não atenda certas demandas ou que encaminhe casos de risco.
+Todos os 26 psicólogos ficam no **Recife**, em 21 bairros diferentes, com CEPs reais (ViaCEP) e o centro de cada bairro (OpenStreetMap). Os perfis exercitam todos os filtros: há quem atenda só presencial, só de manhã, só crianças, que não atenda certas demandas ou que encaminhe casos de risco. A Ana recebe 22 matches (10 + “ver mais”) e 4 ficam de fora.
 
 ---
 
