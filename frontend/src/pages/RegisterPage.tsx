@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Icon } from '../components/Icon';
+import { getErrorMessage } from '../services/api';
 
 export const RegisterPage: React.FC = () => {
   const [userType, setUserType] = useState<'PATIENT' | 'PSYCHOLOGIST'>('PATIENT');
@@ -46,8 +47,8 @@ export const RegisterPage: React.FC = () => {
 
       alert('Cadastro realizado com sucesso! Faça login para acessar sua conta.');
       navigate('/login');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao realizar cadastro.');
+    } catch (err) {
+      setError(getErrorMessage(err, 'Não foi possível concluir o cadastro.'));
     } finally {
       setLoading(false);
     }

@@ -15,6 +15,12 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
+const HomeRoute: React.FC = () => {
+  const { user } = useAuth();
+  if (user?.userType === 'PSYCHOLOGIST') return <Navigate to="/consultas" replace />;
+  return <PatientDashboardPage />;
+};
+
 export const AppRoutes: React.FC = () => {
   const { isAuthenticated, loading } = useAuth();
 
@@ -37,7 +43,7 @@ export const AppRoutes: React.FC = () => {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <PatientDashboardPage />
+            <HomeRoute />
           </ProtectedRoute>
         }
       />

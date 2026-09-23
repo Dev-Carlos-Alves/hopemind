@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getErrorMessage } from '../services/api';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -18,14 +19,9 @@ export const LoginPage: React.FC = () => {
 
     try {
       const u = await login(email, password);
-      if (u.userType === 'PATIENT' && !u.hasTriage) {
-        navigate('/triagem');
-      } else {
-        navigate('/dashboard');
-      }
-    } catch (err: any) {
-      const msg = err.response?.data?.message || err.response?.data?.error || err.message || 'Erro ao realizar login. Verifique suas credenciais.';
-      setError(Array.isArray(msg) ? msg.join(', ') : msg);
+      navigate(u.hasTriage ? '/dashboard' : '/triagem');
+    } catch (err) {
+      setError(getErrorMessage(err, 'Não foi possível entrar. Verifique suas credenciais.'));
     } finally {
       setLoading(false);
     }

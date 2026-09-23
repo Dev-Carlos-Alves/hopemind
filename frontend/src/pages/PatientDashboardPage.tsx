@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { api } from '../services/api';
+import { api, getErrorMessage } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Header } from '../components/Header';
 import { Sidebar } from '../components/Sidebar';
@@ -32,7 +32,10 @@ export const PatientDashboardPage: React.FC = () => {
 
   useEffect(() => {
     const fetchMatches = async () => {
-      if (!user?.patientId) return;
+      if (!user?.patientId) {
+        setLoading(false);
+        return;
+      }
       try {
         const res = await api.get(`/matches/${user.patientId}`);
         setMatches(res.data);
@@ -77,14 +80,13 @@ export const PatientDashboardPage: React.FC = () => {
     try {
       await api.post('/sessoes/agendar', {
         idPsicologo: selectedPsi.idPsicologo,
-        idPaciente: user.patientId,
         dataHora: new Date(appointmentDate).toISOString(),
       });
 
       alert(`Sessão com ${selectedPsi.nome} agendada com sucesso!`);
       setSelectedPsi(null);
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Erro ao agendar sessão.');
+    } catch (err) {
+      alert(getErrorMessage(err, 'Não foi possível agendar a sessão.'));
     } finally {
       setBookingLoading(false);
     }

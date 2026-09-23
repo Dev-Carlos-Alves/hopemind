@@ -53,6 +53,16 @@ export const Sidebar: React.FC = () => {
             <Icon name="calendar" size={16} />
             <span>Agenda de Sessões</span>
           </NavLink>
+
+          <NavLink
+            to="/triagem"
+            className={({ isActive }) =>
+              `sidebar__item ${isActive ? 'sidebar__item--active' : ''}`
+            }
+          >
+            <Icon name="list" size={16} />
+            <span>Perfil de Atendimento</span>
+          </NavLink>
         </>
       )}
 

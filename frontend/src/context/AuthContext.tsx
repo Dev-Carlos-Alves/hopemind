@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         userType: userData.userType,
         patientId: userData.patient?.id || null,
         psychologistId: userData.psychologist?.id || null,
-        hasTriage: true,
+        hasTriage: !!userData.hasTriage,
       });
     } catch {
       setUser(null);

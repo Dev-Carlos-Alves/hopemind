@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
+import { api, getErrorMessage } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Header } from '../components/Header';
 import { Sidebar } from '../components/Sidebar';
@@ -68,8 +68,8 @@ export const TriagePage: React.FC = () => {
       await refreshProfile();
       alert('Triagem concluída com sucesso! Calculando suas melhores recomendações...');
       navigate('/dashboard');
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Erro ao enviar triagem.');
+    } catch (err) {
+      alert(getErrorMessage(err, 'Não foi possível enviar a triagem.'));
     } finally {
       setSubmitting(false);
     }
