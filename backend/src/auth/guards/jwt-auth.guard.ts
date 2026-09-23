@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
+import { ACCESS_COOKIE, accessSecret } from '../auth.config';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
@@ -26,7 +27,7 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest();
-    let token = request.cookies?.['access_token'];
+    let token = request.cookies?.[ACCESS_COOKIE];
 
     if (!token && request.headers.authorization) {
       const [type, headerToken] = request.headers.authorization.split(' ');
@@ -40,9 +41,7 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: process.env.JWT_ACCESS_SECRET || 'hopemind-access-secret-key-2026-prottus',
-      });
+      const payload = await this.jwtService.verifyAsync(token, { secret: accessSecret() });
       request['user'] = payload;
     } catch {
       throw new UnauthorizedException('Token inválido ou expirado');

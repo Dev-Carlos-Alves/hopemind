@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
-import { AppointmentsService } from './appointments.service';
+import { Body, Controller, ForbiddenException, Get, Post, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AppointmentsService } from './appointments.service';
+import { CreateAppointmentDto } from './dto/create-appointment.dto';
 
 @ApiTags('Appointments')
 @Controller('api/sessoes')
@@ -8,19 +9,18 @@ export class AppointmentsController {
   constructor(private appointmentsService: AppointmentsService) {}
 
   @Post('agendar')
-  @ApiOperation({ summary: 'Agendar uma sessão entre Paciente e Psicólogo' })
-  async agendarSessao(@Body() body: any) {
-    const { idPsicologo, idPaciente, dataHora } = body;
-    return this.appointmentsService.createAppointment(
-      Number(idPsicologo),
-      Number(idPaciente),
-      dataHora,
-    );
+  @ApiOperation({ summary: 'Paciente logado agenda uma sessão com um psicólogo' })
+  agendarSessao(@Req() req: any, @Body() body: CreateAppointmentDto) {
+    const patientId: number | null = req.user.patientId;
+    if (!patientId) {
+      throw new ForbiddenException('Apenas pacientes podem agendar sessões.');
+    }
+    return this.appointmentsService.createAppointment(body.idPsicologo, patientId, body.dataHora);
   }
 
   @Get()
   @ApiOperation({ summary: 'Listar agendamentos do usuário logado' })
-  async getMinhasSessoes(@Req() req: any) {
+  getMinhasSessoes(@Req() req: any) {
     return this.appointmentsService.getAppointmentsForUser(req.user.sub);
   }
 }

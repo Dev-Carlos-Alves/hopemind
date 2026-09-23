@@ -4,9 +4,14 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { accessSecret, refreshSecret } from './auth/auth.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Fail fast instead of silently signing tokens with a secret that is public in the repo.
+  accessSecret();
+  refreshSecret();
 
   // Helmet Security Headers
   app.use(helmet());
@@ -28,6 +33,7 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: true,
+      stopAtFirstError: true,
     }),
   );
 

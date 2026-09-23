@@ -1,5 +1,7 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+
+const SESSION_MINUTES = 50;
 
 @Injectable()
 export class AppointmentsService {
@@ -16,16 +18,34 @@ export class AppointmentsService {
       throw new BadRequestException('Não é permitido agendar sessões no passado.');
     }
 
+    const psychologist = await this.prisma.psychologist.findUnique({ where: { id: psychologistId } });
+    if (!psychologist) {
+      throw new NotFoundException('Psicólogo não encontrado.');
+    }
+
+    const windowStart = new Date(parsedDate.getTime() - SESSION_MINUTES * 60_000 + 1);
+    const windowEnd = new Date(parsedDate.getTime() + SESSION_MINUTES * 60_000 - 1);
+    const clash = await this.prisma.appointment.findFirst({
+      where: {
+        status: 'SCHEDULED',
+        appointmentDate: { gte: windowStart, lte: windowEnd },
+        OR: [{ psychologistId }, { patientId }],
+      },
+    });
+    if (clash) {
+      throw new ConflictException(
+        clash.psychologistId === psychologistId
+          ? 'O profissional já tem uma sessão nesse horário. Escolha outro horário.'
+          : 'Você já tem uma sessão marcada nesse horário.',
+      );
+    }
+
     const appointment = await this.prisma.appointment.create({
       data: {
         psychologistId,
         patientId,
         appointmentDate: parsedDate,
         status: 'SCHEDULED',
-      },
-      include: {
-        psychologist: { include: { user: true } },
-        patient: { include: { user: true } },
       },
     });
 

@@ -4,13 +4,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 @Module({
-  imports: [
-    JwtModule.register({
-      global: true,
-      secret: process.env.JWT_ACCESS_SECRET || 'hopemind-access-secret-key-2026-prottus',
-      signOptions: { expiresIn: '15m' },
-    }),
-  ],
+  // Secrets are passed on every sign/verify call so they are read after .env is loaded.
+  imports: [JwtModule.register({ global: true })],
   controllers: [AuthController],
   providers: [AuthService],
   exports: [AuthService],

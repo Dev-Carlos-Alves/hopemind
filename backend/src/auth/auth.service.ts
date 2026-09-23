@@ -1,12 +1,19 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from '../prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
 import { UserType } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
+import { PrismaService } from '../prisma/prisma.service';
+import { accessSecret, refreshSecret } from './auth.config';
+import { RegisterDto } from './dto/auth.dto';
+
+export interface JwtPayload {
+  sub: number;
+  email: string;
+  name: string;
+  userType: UserType;
+  patientId: number | null;
+  psychologistId: number | null;
+}
 
 @Injectable()
 export class AuthService {
@@ -15,154 +22,106 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(data: any) {
-    const {
-      email,
-      password,
-      name,
-      cpf,
-      phone,
-      birthDate,
-      gender,
-      userType,
-      // Patient fields
-      mainComplaint,
-      // Psychologist fields
-      crp,
-      contactLink,
-      specialty,
-      therapeuticApproach,
-      biography,
-      sessionFee,
-    } = data;
-
-    if (!email || !password || !name || !cpf || !userType) {
-      throw new BadRequestException('Preencha todos os campos obrigatórios.');
-    }
-
+  async register(data: RegisterDto) {
     const existingUser = await this.prisma.user.findFirst({
-      where: {
-        OR: [{ email }, { cpf }],
-      },
+      where: { OR: [{ email: data.email }, { cpf: data.cpf }] },
     });
-
     if (existingUser) {
       throw new BadRequestException('E-mail ou CPF já cadastrados no sistema.');
     }
 
-    const passwordHash = await bcrypt.hash(password, 10);
-    const parsedBirthDate = birthDate ? new Date(birthDate) : new Date('2000-01-01');
+    const isPsychologist = data.userType === 'PSYCHOLOGIST';
+
+    if (isPsychologist) {
+      const crpInUse = await this.prisma.psychologist.findUnique({ where: { crp: data.crp.toUpperCase() } });
+      if (crpInUse) {
+        throw new BadRequestException('Este CRP já está cadastrado.');
+      }
+    }
 
     const user = await this.prisma.user.create({
       data: {
-        email,
-        passwordHash,
-        name,
-        cpf,
-        phone: phone || '',
-        birthDate: parsedBirthDate,
-        gender: gender || 'Não informado',
-        userType: userType === 'PSYCHOLOGIST' ? UserType.PSYCHOLOGIST : UserType.PATIENT,
-        patient:
-          userType !== 'PSYCHOLOGIST'
-            ? {
-                create: {
-                  mainComplaint: mainComplaint || '',
-                },
-              }
-            : undefined,
-        psychologist:
-          userType === 'PSYCHOLOGIST'
-            ? {
-                create: {
-                  crp: crp || `CRP 00/${Math.floor(Math.random() * 900000 + 100000)}`,
-                  contactLink: contactLink || '',
-                  specialty: specialty || 'Psicologia Clínica',
-                  therapeuticApproach: therapeuticApproach || 'Geral',
-                  biography: biography || '',
-                  sessionFee: sessionFee ? Number(sessionFee) : 150.0,
-                },
-              }
-            : undefined,
-      },
-      include: {
-        patient: true,
-        psychologist: true,
+        email: data.email.toLowerCase(),
+        passwordHash: await bcrypt.hash(data.password, 10),
+        name: data.name,
+        cpf: data.cpf,
+        phone: data.phone,
+        birthDate: new Date(data.birthDate),
+        gender: data.gender || 'Não informado',
+        userType: isPsychologist ? UserType.PSYCHOLOGIST : UserType.PATIENT,
+        patient: isPsychologist ? undefined : { create: { mainComplaint: data.mainComplaint || null } },
+        psychologist: isPsychologist
+          ? {
+              create: {
+                crp: data.crp.toUpperCase(),
+                specialty: data.specialty,
+                therapeuticApproach: data.therapeuticApproach || data.specialty,
+                biography: data.biography || null,
+                contactLink: data.contactLink || null,
+                sessionFee: data.sessionFee ?? 0,
+              },
+            }
+          : undefined,
       },
     });
 
-    return {
-      message: 'Cadastro realizado com sucesso!',
-      userId: user.id,
-    };
+    return { message: 'Cadastro realizado com sucesso!', userId: user.id };
   }
 
-  async login(email: string, pass: string) {
+  async login(email: string, password: string) {
     const user = await this.prisma.user.findUnique({
-      where: { email },
-      include: {
-        patient: true,
-        psychologist: true,
-      },
+      where: { email: email.toLowerCase() },
+      include: { patient: true, psychologist: true },
     });
 
-    if (!user || !user.isActive) {
-      throw new UnauthorizedException('Credenciais inválidas ou conta inativa.');
+    const valid = user && user.isActive && (await bcrypt.compare(password, user.passwordHash));
+    if (!valid) {
+      throw new UnauthorizedException('E-mail ou senha incorretos.');
     }
 
-    const isMatch = await bcrypt.compare(pass, user.passwordHash);
-    if (!isMatch) {
-      throw new UnauthorizedException('Credenciais inválidas.');
-    }
-
-    let hasTriage = false;
-    let patientId = user.patient?.id || null;
-    let psychologistId = user.psychologist?.id || null;
-
-    if (patientId) {
-      const answers = await this.prisma.patientAnswer.findFirst({
-        where: { patientId },
-      });
-      if (answers) hasTriage = true;
-    } else if (psychologistId) {
-      const answers = await this.prisma.psychologistAnswer.findFirst({
-        where: { psychologistId },
-      });
-      if (answers) hasTriage = true;
-    }
-
-    const payload = {
+    const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
       name: user.name,
       userType: user.userType,
-      patientId,
-      psychologistId,
+      patientId: user.patient?.id ?? null,
+      psychologistId: user.psychologist?.id ?? null,
     };
-
-    const accessToken = await this.jwtService.signAsync(payload, {
-      secret: process.env.JWT_ACCESS_SECRET || 'hopemind-access-secret-key-2026-prottus',
-      expiresIn: '15m',
-    });
-
-    const refreshToken = await this.jwtService.signAsync(payload, {
-      secret: process.env.JWT_REFRESH_SECRET || 'hopemind-refresh-secret-key-2026-prottus',
-      expiresIn: '7d',
-    });
 
     return {
-      accessToken,
-      refreshToken,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        userType: user.userType,
-        patientId,
-        psychologistId,
-        hasTriage,
-      },
+      ...(await this.issueTokens(payload)),
+      user: { ...this.publicUser(payload), hasTriage: await this.hasTriage(payload) },
     };
+  }
+
+  async refresh(refreshToken: string | undefined) {
+    if (!refreshToken) {
+      throw new UnauthorizedException('Sessão expirada.');
+    }
+
+    let payload: JwtPayload;
+    try {
+      payload = await this.jwtService.verifyAsync<JwtPayload>(refreshToken, { secret: refreshSecret() });
+    } catch {
+      throw new UnauthorizedException('Sessão expirada.');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      include: { patient: true, psychologist: true },
+    });
+    if (!user || !user.isActive) {
+      throw new UnauthorizedException('Sessão expirada.');
+    }
+
+    return this.issueTokens({
+      sub: user.id,
+      email: user.email,
+      name: user.name,
+      userType: user.userType,
+      patientId: user.patient?.id ?? null,
+      psychologistId: user.psychologist?.id ?? null,
+    });
   }
 
   async getProfile(userId: number) {
@@ -172,13 +131,22 @@ export class AuthService {
         id: true,
         email: true,
         name: true,
-        cpf: true,
         phone: true,
         birthDate: true,
         gender: true,
         userType: true,
-        patient: true,
-        psychologist: true,
+        patient: { select: { id: true, mainComplaint: true } },
+        psychologist: {
+          select: {
+            id: true,
+            crp: true,
+            specialty: true,
+            therapeuticApproach: true,
+            biography: true,
+            sessionFee: true,
+            contactLink: true,
+          },
+        },
       },
     });
 
@@ -186,6 +154,38 @@ export class AuthService {
       throw new UnauthorizedException('Usuário não encontrado.');
     }
 
-    return user;
+    const hasTriage = await this.hasTriage({
+      patientId: user.patient?.id ?? null,
+      psychologistId: user.psychologist?.id ?? null,
+    });
+
+    return { ...user, hasTriage };
+  }
+
+  private async issueTokens(payload: JwtPayload) {
+    const accessToken = await this.jwtService.signAsync(payload, { secret: accessSecret(), expiresIn: '15m' });
+    const refreshToken = await this.jwtService.signAsync(payload, { secret: refreshSecret(), expiresIn: '7d' });
+    return { accessToken, refreshToken };
+  }
+
+  private publicUser(p: JwtPayload) {
+    return {
+      id: p.sub,
+      name: p.name,
+      email: p.email,
+      userType: p.userType,
+      patientId: p.patientId,
+      psychologistId: p.psychologistId,
+    };
+  }
+
+  private async hasTriage(p: Pick<JwtPayload, 'patientId' | 'psychologistId'>) {
+    if (p.patientId) {
+      return !!(await this.prisma.patientAnswer.findFirst({ where: { patientId: p.patientId } }));
+    }
+    if (p.psychologistId) {
+      return !!(await this.prisma.psychologistAnswer.findFirst({ where: { psychologistId: p.psychologistId } }));
+    }
+    return false;
   }
 }

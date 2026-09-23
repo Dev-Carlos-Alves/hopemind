@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, Param, ParseIntPipe, Post, Query, Req } from '@nestjs/common';
 import { TriageService } from './triage.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
@@ -21,7 +21,10 @@ export class TriageController {
 
   @Get('api/matches/:pacienteId')
   @ApiOperation({ summary: 'Obter recomendação de psicólogos com % de Match para um paciente' })
-  async getMatches(@Param('pacienteId', ParseIntPipe) pacienteId: number) {
+  async getMatches(@Req() req: any, @Param('pacienteId', ParseIntPipe) pacienteId: number) {
+    if (req.user.patientId !== pacienteId) {
+      throw new ForbiddenException('Você só pode consultar as suas próprias recomendações.');
+    }
     return this.triageService.getMatches(pacienteId);
   }
 }

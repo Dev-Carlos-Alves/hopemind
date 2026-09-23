@@ -50,60 +50,44 @@ export class TriageService {
       throw new BadRequestException('Usuário não encontrado.');
     }
 
-    const tagIds = new Set<number>();
+    const options = await this.prisma.triageOption.findMany({
+      where: { id: { in: respostas.map((r) => Number(r.idOpcao)) } },
+    });
+    const optionById = new Map(options.map((o) => [o.id, o]));
 
     for (const r of respostas) {
-      const option = await this.prisma.triageOption.findUnique({
-        where: { id: r.idOpcao },
-      });
-
-      if (option && option.tagId) {
-        tagIds.add(option.tagId);
-      }
-
-      if (user.patient) {
-        await this.prisma.patientAnswer.create({
-          data: {
-            patientId: user.patient.id,
-            questionId: r.idPergunta,
-            optionId: r.idOpcao,
-          },
-        });
-      } else if (user.psychologist) {
-        await this.prisma.psychologistAnswer.create({
-          data: {
-            psychologistId: user.psychologist.id,
-            questionId: r.idPergunta,
-            optionId: r.idOpcao,
-          },
-        });
+      const option = optionById.get(Number(r.idOpcao));
+      if (!option || option.questionId !== Number(r.idPergunta)) {
+        throw new BadRequestException('Resposta inválida para a pergunta informada.');
       }
     }
 
-    // Link Tags to Patient or Psychologist
-    for (const tagId of Array.from(tagIds)) {
+    const tagIds = Array.from(new Set(options.map((o) => o.tagId).filter((id): id is number => id !== null)));
+
+    // A new submission replaces the previous profile instead of piling up on top of it.
+    await this.prisma.$transaction(async (tx) => {
       if (user.patient) {
-        await this.prisma.patientTag.upsert({
-          where: {
-            patientId_tagId: { patientId: user.patient.id, tagId },
-          },
-          update: {},
-          create: { patientId: user.patient.id, tagId },
+        const patientId = user.patient.id;
+        await tx.patientAnswer.deleteMany({ where: { patientId } });
+        await tx.patientTag.deleteMany({ where: { patientId } });
+        await tx.patientAnswer.createMany({
+          data: respostas.map((r) => ({ patientId, questionId: Number(r.idPergunta), optionId: Number(r.idOpcao) })),
         });
+        await tx.patientTag.createMany({ data: tagIds.map((tagId) => ({ patientId, tagId })) });
       } else if (user.psychologist) {
-        await this.prisma.psychologistTag.upsert({
-          where: {
-            psychologistId_tagId: { psychologistId: user.psychologist.id, tagId },
-          },
-          update: {},
-          create: { psychologistId: user.psychologist.id, tagId },
+        const psychologistId = user.psychologist.id;
+        await tx.psychologistAnswer.deleteMany({ where: { psychologistId } });
+        await tx.psychologistTag.deleteMany({ where: { psychologistId } });
+        await tx.psychologistAnswer.createMany({
+          data: respostas.map((r) => ({ psychologistId, questionId: Number(r.idPergunta), optionId: Number(r.idOpcao) })),
         });
+        await tx.psychologistTag.createMany({ data: tagIds.map((tagId) => ({ psychologistId, tagId })) });
       }
-    }
+    });
 
     return {
       message: 'Triagem enviada com sucesso.',
-      tags: Array.from(tagIds),
+      tags: tagIds,
     };
   }
 
