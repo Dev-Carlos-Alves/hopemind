@@ -1,9 +1,8 @@
-# Requisitos — índice
-
-Requisitos de negócio **e** métricas de qualidade (segurança / escalabilidade).
+# Requisitos
 
 | Arquivo | Conteúdo |
-|---------|----------|
-| [`requisito.md`](requisito.md) | Visão, operações, RNF (inclui RNF-01…07) |
+|---|---|
+| [`HopeMind_Formularios_e_Algoritmo_de_Match.docx`](HopeMind_Formularios_e_Algoritmo_de_Match.docx) | **Documento-base**: formulários do paciente e do psicólogo, critérios e algoritmo de match |
+| [`algoritmo-de-match.md`](algoritmo-de-match.md) | Como o documento foi implementado, seção por seção, e as decisões de interpretação |
 
-Complementos: [`../seguranca.md`](../seguranca.md) · [`../escalabilidade.md`](../escalabilidade.md) · [`../especificacoes.md`](../especificacoes.md)
+Requisitos não funcionais: [`../seguranca.md`](../seguranca.md) · [`../ARQUITETURA-WEB.md`](../ARQUITETURA-WEB.md) · [`../design-system.md`](../design-system.md)

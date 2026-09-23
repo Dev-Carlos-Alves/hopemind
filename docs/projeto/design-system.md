@@ -1,75 +1,58 @@
-# Design System — Distac (marca do projeto)
+# Design system — HopeMind
 
-Extende o padrão Prottus: [`docs/prottus/design-system.md`](../prottus/design-system.md).
+Inspirado nas Human Interface Guidelines da Apple: tipografia grande e confiante, muito respiro, superfícies translúcidas, cantos arredondados e movimento suave. Tudo em CSS puro, sem dependências.
 
-Defaults de apps: [`padrao-aplicacoes.md`](padrao-aplicacoes.md).
+Arquivos: [`frontend/src/styles/`](../../frontend/src/styles/) — `tokens.css` (cores, tipos, espaçamento), `base.css`, `components.css`, `layout.css`. Componentes React em [`components/ui.tsx`](../../frontend/src/components/ui.tsx).
 
-**Fonte da marca:** logo oficial [`imagens/distac.png`](../../imagens/distac.png) (triângulo vermelho + DISTAC preto + faixa azul DISTRIBUIDORA).
+## Cores
 
-Cores amostradas do logo: vermelho `#C02028`, azul `#60A0D8`, preto `#000000`, branco `#FFFFFF`.  
-Hover/active da primária: derivados do vermelho da marca (declarado aqui).
+A paleta vem do próprio logo:
 
-## 1. Marca
+| Token | Claro | Escuro | Origem / uso |
+|---|---|---|---|
+| `--tint` | `#3A7733` | `#8FCB7A` | Sálvia das mãos — ações, seleção, links |
+| `--sand` / `--sand-label` | `#E9C987` / `#8B6420` | `#E8C37E` | Cérebro — destaques e "boa compatibilidade" |
+| `--peach` / `--peach-label` | `#F2B173` / `#9A5418` | `#F4BD8A` | Mascote — acolhimento, painel de apoio |
+| `--bg` / `--bg-elevated` | `#F5F5F7` / `#FFFFFF` | `#000000` / `#1C1C1E` | Fundo agrupado e cartões |
+| `--label` / `--label-2` | `#1D1D1F` / `#6E6E73` | `#F5F5F7` / `#A1A1A6` | Texto principal e secundário |
 
-| Token | Hex | Uso |
-|-------|-----|-----|
-| `--brand-primary` | `#C02028` | Ações primárias, CTAs, destaque (telhado do logo) |
-| `--brand-primary-hover` | `#A01A20` | Hover (derivado da primária) |
-| `--brand-primary-active` | `#801418` | Active (derivado da primária) |
-| `--brand-secondary` | `#60A0D8` | Acentos, faixa DISTRIBUIDORA, links secundários |
-| `--brand-secondary-hover` | `#4A8AC4` | Hover secundário (derivado) |
-| `--brand-ink` | `#000000` | Títulos / wordmark DISTAC |
+Todos os pares de texto/fundo passam em **WCAG AA (≥ 4,5:1)**. O tema segue o sistema e pode ser forçado em *Ajustes → Aparência*.
 
-## 2. Superfícies
+## Tipografia
 
-| Token | Hex | Uso |
-|-------|-----|-----|
-| `--header-bg` | `#FFFFFF` | Topbar profissional (logo legível) |
-| `--header-text` | `#000000` | Texto do header |
-| `--sidebar-bg` | `#1A2332` | Sidebar sóbria |
-| `--sidebar-active-bg` | `#C02028` | Item ativo (primária) |
-| `--page-bg` | `#F4F7FA` | Fundo da página |
-| `--card-bg` | `#FFFFFF` | Cards / painéis |
-| `--filter-bar-bg` | `#E8F1F8` | FilterBar (azul Distac claro) |
-| `--table-header-bg` | `#60A0D8` | Header de tabela (secundária) |
-| `--tile-bg` | `#FFFFFF` | Tiles |
+Fonte do sistema (SF Pro no Apple, Inter como fallback) com a escala da HIG:
 
-Header com borda inferior sutil `--border-color` para separação profissional sem competir com o logo.
+| Classe | Tamanho | Uso |
+|---|---|---|
+| `.t-large-title` | 34 px (30 no celular) | Título da página |
+| `.t-title-1/2/3` | 28 / 22 / 20 px | Seções e cartões |
+| `.t-headline` | 17 px semibold | Nomes, rótulos fortes |
+| `.t-callout` / `.t-subhead` / `.t-footnote` | 15 / 14 / 13 px | Texto de apoio |
 
-## 3. Texto, bordas e status
+Títulos usam espaçamento negativo (−0,02 a −0,035 em) como na Apple.
 
-| Token | Hex |
-|-------|-----|
-| `--text-primary` | `#1A1A1A` |
-| `--text-secondary` | `#4A5568` |
-| `--text-muted` | `#718096` |
-| `--border-color` | `#D0D7DE` |
-| `--info-banner` | `#E8F1F8` |
-| `--success` | `#2F9E44` |
-| `--warning` | `#F59F00` |
-| `--danger` | `#C02028` |
-| `--info` | `#60A0D8` |
-| `--neutral` | `#868E96` |
+## Componentes
 
-## 4. Tipografia
+| Componente | Onde |
+|---|---|
+| Botões em pílula: `filled`, `tinted`, `gray`, `plain`, `danger` | `Button` |
+| Campo com rótulo flutuante (estilo Apple ID), senha com mostrar/ocultar | `TextField`, `PasswordField`, `SelectField` |
+| Segmented control com trilho animado e navegação por setas | `Segmented` |
+| Lista agrupada (estilo Ajustes do iOS) | `.group`, `.list-row` |
+| Sheet: diálogo no desktop, bottom sheet com alça no celular | `Sheet` |
+| Toasts no lugar de `alert()` | `useToast` |
+| Skeletons no lugar de "Carregando..." | `Skeleton` |
+| Avatar com iniciais e gradiente derivado do nome | `Avatar` |
+| Chips, escala 1–5, grade semanal, matriz | `QuestionField` |
 
-Padrão Prottus (tamanhos) + sans-serif moderna alinhada ao wordmark do logo.
+## Layout
 
-| Token | Valor |
-|-------|-------|
-| `--font-family` | `"Source Sans 3", "Segoe UI", sans-serif` |
-| `--font-size-body` | 14px |
-| `--font-size-small` | 12px |
-| `--font-size-title` | 16px |
-| `--font-size-module` | 18px |
+- **Desktop:** barra lateral translúcida (264 px) + conteúdo até 1080 px.
+- **Celular (< 900 px):** barra superior translúcida + **tab bar** inferior, respeitando a área segura do iPhone.
+- Animações de entrada curtas (`rise-in`), desligadas com `prefers-reduced-motion`.
 
-Títulos de módulo: **bold, UPPERCASE** (contrato Prottus).
+## Regras
 
-## 5. Assets
-
-| Item | Caminho |
-|------|---------|
-| Logo fonte | `imagens/distac.png` |
-| Logo app | `frontend/public/assets/distac.png` |
-| Tokens CSS | `frontend/src/styles/distac-tokens.css` |
-| Uso | Login, header/shell, favicon se couber |
+- Sem emojis na interface; ícones SVG de traço (`Icon.tsx`).
+- Nunca mostrar compatibilidade como porcentagem — usar faixa + razões.
+- Texto em português, direto e acolhedor; evitar jargão clínico.

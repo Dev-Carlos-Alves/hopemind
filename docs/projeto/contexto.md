@@ -1,46 +1,29 @@
-# Contexto do projeto — Distac
-
-> Stack → [`especificacoes.md`](especificacoes.md) · Segurança → [`seguranca.md`](seguranca.md) · Escala → [`escalabilidade.md`](escalabilidade.md)
+# Contexto — HopeMind
 
 ## Objetivo
 
-Sistema de vendas internas da **Distribuidora Distac** (Prottus). Distribuição de material de construção em Pernambuco; clientes do negócio são lojas. Vendedores internos registram e acompanham vendas de forma **simples, completa, segura** e **preparada para crescer conforme o contexto**.
+Ajudar pessoas a encontrar um(a) psicólogo(a) **compatível com o que buscam, com o jeito como gostam de ser acompanhadas e com a própria rotina**, e marcar a primeira sessão sem fricção.
 
-Este repositório é também a **base operacional** Prottus para novos projetos na mesma stack — ver [`USAR-COMO-BASE.md`](USAR-COMO-BASE.md).
+O HopeMind **não faz diagnóstico** nem substitui avaliação psicológica: o match estima compatibilidade de preferências, experiência e logística (ver [`requisitos/`](requisitos/)).
 
 ## Usuários
 
-- **Vendedor interno:** pedidos, clientes, produtos.
-- Outros perfis: confirmar em DOP se necessário.
+| Perfil | O que faz |
+|---|---|
+| **Paciente** | Responde o questionário (demandas, estilo, relação, rotina), vê recomendações explicadas e agenda sessões |
+| **Psicólogo(a)** | Cadastra CRP, responde o perfil de atendimento (experiência por demanda, estilo, agenda) e acompanha a agenda |
+| **Equipe clínica** *(futuro)* | Acompanha alertas de segurança e valida perguntas e pesos |
 
-## Escopo
+## Escopo atual
 
-- Login (JWT httpOnly)
-- CRUD `cliente`, `produto`, `pedido` + `pedido_item`
-- Listagens paginadas e dashboard summary
-- Integridade/auditoria no PostgreSQL
-- Testes de segurança e carga
+- Cadastro e login (paciente / psicólogo com CRP obrigatório)
+- Questionários versionados e fluxo de segurança para respostas de risco
+- Match determinístico e explicável (filtros + 7 componentes ponderados)
+- Agendamento de sessões de 50 min sem conflito de horário
+- PWA responsiva com tema claro/escuro
 
-## Fora de escopo
+## Fora do escopo (por enquanto)
 
-- Tabelas de negócio além das quatro (exceto `user` / `audit_log` de plataforma)
-- Integrações ERP/fiscal/estoque/e-commerce
-- App do lojista final
-- Financeiro / logística / CRM ampliado
-
-## Onde ler o quê
-
-| Assunto | Arquivo |
-|---------|---------|
-| **Domínio técnico (tech lead)** | [`DOMINIO-TECNICO.md`](DOMINIO-TECNICO.md) |
-| Metodologia Prottus | [`docs/prottus/metodologia.md`](../prottus/metodologia.md) |
-| Specs técnicas | [`especificacoes.md`](especificacoes.md) |
-| **Segurança** | [`seguranca.md`](seguranca.md) |
-| **Escalabilidade** | [`escalabilidade.md`](escalabilidade.md) |
-| Usar como base | [`USAR-COMO-BASE.md`](USAR-COMO-BASE.md) |
-| Marca | [`design-system.md`](design-system.md) |
-| Domínio de negócio | [`mapa-entidades.md`](mapa-entidades.md) |
-| Requisitos | [`requisitos/requisito.md`](requisitos/requisito.md) |
-| Status | [`modulos/STATUS_PROTOTIPO.md`](modulos/STATUS_PROTOTIPO.md) |
-| Banco | [`../../database/`](../../database/) |
-| Testes | [`../../tests/`](../../tests/) |
+- Pagamento, videochamada e prontuário
+- Painel da equipe clínica para `safety_alerts`
+- Match dinâmico após o início da terapia (seção 10 do documento de requisitos)

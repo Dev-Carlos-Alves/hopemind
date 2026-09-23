@@ -1,7 +1,7 @@
 # Cursor — Cadu
 
-**Repositório:** Distac — Vendas Internas (**base web Prottus**)  
-**Última atualização:** 2026-07-23  
+**Repositório:** HopeMind — plataforma de match paciente ↔ psicólogo (SafeMindLive)
+**Última atualização:** 2026-09-22
 **Local:** `.cursor/agents/cursor-cadu.md`
 
 ---
@@ -10,38 +10,33 @@
 
 | Item | Valor |
 |------|-------|
-| Cliente | Distribuidora Distac |
-| Papel do repo | Produto Distac + referência inicial Prottus |
-| Stack | React+Vite+TS · NestJS · Prisma · PostgreSQL · JWT httpOnly |
-| Segurança | Helmet, rate limit, audit_log sem password_hash, cookies httpOnly |
-| Escala | Paginação, summary, doc de evolução |
-| Domínio técnico | `docs/projeto/DOMINIO-TECNICO.md` (handbook tech lead) |
-| Status | Protótipo completo + docs de base alinhados |
+| Produto | HopeMind (acadêmico) |
+| Stack | React+Vite+TS · NestJS · Prisma · MariaDB · JWT httpOnly |
+| Match | Algoritmo `hm-match-1.0.0` conforme documento de requisitos, com testes |
+| UI | Design system próprio estilo Apple, claro/escuro, PWA |
+| Segurança | Rate limit, DTOs, IDOR corrigido, refresh token, CRP obrigatório |
+| Docs | `docs/projeto/` reescrito para o HopeMind (antes: template Distac) |
 
 ---
 
 ## Histórico de sessões
 
-### 2026-07-23 — Kickoff + scaffold + CRUDs
+### 2026-07-23 / 24 — Base herdada
+Projeto iniciado a partir da base web Distac/Prottus (scaffold, auth, CRUDs, skills). Docs e regras do agente ainda descreviam o Distac.
 
-Fundação, stack, marca, login, CRUDs, DB local sem Docker.
-
-### 2026-07-23 — Segurança, escala, triggers, testes
-
-Helmet, Throttler, paginação, summary, triggers/`audit_log`, load tests.
-
-### 2026-07-24 — Skills do projeto (`.cursor/skills`)
-
-- Criadas 7 skills versionadas: local-run, add-crud, security, database, load-tests, tech-lead-context, prottus-base-from-distac
-- Documentado rules vs skills em `.cursor/README.md`
+### 2026-09-22 — Revisão geral (Claude)
+- Segurança: IDOR em matches e agendamento, rate limit inativo, DTOs sem efeito, CRP inventado, token no corpo do login
+- Rebrand visual estilo Apple com paleta do logo
+- Motor de match implementado a partir do docx de requisitos
+- Docs e `.cursor/` trocados do Distac para o HopeMind
 
 ---
 
 ## Pendências
 
-- Homolog/prod, CI/CD, TLS
-- Revogação de refresh token em produção (se exigido)
-- FUNCTIONS.md se o time exigir
+- Validar perguntas e pesos com psicólogo(a); protocolo clínico dos `safety_alerts`
+- Match dinâmico pós-início (seção 10 do documento)
+- Homologação/produção: HTTPS, CI, revogação de refresh token, LGPD
 
 ## Como atualizar
 

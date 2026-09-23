@@ -1,0 +1,43 @@
+---
+description: Regras do projeto HopeMind — contexto, stack, match, segurança e design
+alwaysApply: true
+---
+
+# Projeto HopeMind — regras específicas
+
+Complementa `.cursor/rules/prottus/`.
+
+## Contexto
+- Plataforma que conecta **pacientes** a **psicólogos** compatíveis e agenda sessões.
+- Projeto acadêmico da SafeMindLive. Não é diagnóstico nem prontuário.
+- Documento-base do negócio: `docs/projeto/requisitos/HopeMind_Formularios_e_Algoritmo_de_Match.docx`
+  (implementação explicada em `docs/projeto/requisitos/algoritmo-de-match.md`).
+
+## Ler antes de mudar código
+- `docs/projeto/ARQUITETURA-WEB.md` — camadas, módulos, rotas
+- `docs/projeto/mapa-entidades.md` — tabelas
+- `docs/projeto/seguranca.md` — o que é obrigatório manter
+- `docs/projeto/design-system.md` — tokens e componentes de UI
+
+## Stack
+- React 18 + Vite + TS (sem framework CSS) · NestJS · Prisma · **MariaDB/MySQL**
+- Sessão: JWT access + refresh em cookie `httpOnly`; `JwtAuthGuard` e `ThrottlerGuard` globais; exceções com `@Public()`
+- Toda rota com corpo usa DTO com class-validator (o `ValidationPipe` rejeita campos extras)
+- Desenvolvimento: `npm run dev`; schema com `prisma db push`; `npm test` roda os testes do match
+
+## Match (não quebrar)
+- Perguntas ficam em `backend/src/triage/questionnaire/` — mudou pergunta, **suba a `version`**
+- Motor puro em `backend/src/triage/match/match-engine.ts` — mudou peso/regra, **suba `ALGORITHM_VERSION`** e ajuste `match-engine.spec.ts`
+- Respostas de risco (P26/P27) **nunca** entram no score; só abrem `safety_alerts` e mostram canais de apoio
+- A interface **não** mostra porcentagem de compatibilidade — só faixa + razões
+
+## Segurança
+- Nada de secrets com valor padrão no código; `.env` nunca versionado
+- Paciente só acessa os próprios dados; IDs de dono vêm do token, nunca do corpo da requisição
+- Dados de saúde são sensíveis (LGPD): não logar respostas do questionário
+
+## UI
+- Seguir `frontend/src/styles/tokens.css`; não usar cores soltas — criar token se precisar
+- Componentes em `frontend/src/components/ui.tsx`; ícones SVG em `Icon.tsx`; sem emojis
+- Toasts (`useToast`) em vez de `alert()`; skeletons em vez de "Carregando..."
+- Testar claro/escuro e celular (tab bar) em toda tela nova

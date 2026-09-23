@@ -1,110 +1,31 @@
-# Segurança — Distac (referência Prottus)
+# Segurança — HopeMind
 
-Documento **obrigatório** deste projeto-base. Em novos clientes, mantenha o mesmo nível (adapte o domínio, não baixe a barra).
+O HopeMind lida com **dados de saúde mental**, que a LGPD trata como dados sensíveis. Esta página descreve o que já está implementado e o que falta antes de qualquer uso real.
 
-Metodologia geral: [`docs/prottus/metodologia.md`](../prottus/metodologia.md).  
-Testes: [`../../tests/README.md`](../../tests/README.md).
+## Implementado
 
----
+| Tema | Como |
+|---|---|
+| Sessão | JWT em cookies `httpOnly` + `sameSite=lax` (+ `secure` em produção). O token **não** volta no corpo do login, então não fica acessível a JavaScript |
+| Renovação | `/api/auth/refresh` emite novos tokens a partir do cookie de refresh; o front renova sozinho ao receber 401 |
+| Segredos | `JWT_ACCESS_SECRET` e `JWT_REFRESH_SECRET` são obrigatórios — a API não sobe sem eles (não há valor padrão no código) |
+| Senhas | bcrypt (custo 10), mínimo de 8 caracteres |
+| Força bruta | `ThrottlerGuard` global (100 req/min) e 5 req/min em cadastro e login |
+| Autorização | Guard JWT global; paciente só lê as **próprias** recomendações; o paciente do agendamento vem do token, nunca do corpo da requisição |
+| Validação | `ValidationPipe` global com DTOs (`whitelist` + `forbidNonWhitelisted`); respostas do questionário validadas contra a definição versionada |
+| Profissionais | Cadastro de psicólogo exige CRP no formato oficial e único |
+| Cabeçalhos | `helmet` |
+| Risco clínico | Respostas de risco abrem `safety_alerts` e mostram canais de apoio (CVV 188, SAMU 192); nunca alteram o ranking |
 
-## 1. Princípios
+## Antes de produção
 
-1. **Defesa em profundidade** — API valida; banco reforça (triggers); testes comprovam.
-2. **Secrets fora do git** — só `.env` local / vault em produção.
-3. **Mínimo privilégio** — JWT curto; rotas autenticadas; cookies httpOnly.
-4. **Dados sensíveis nunca em claro na auditoria / logs** — anonimizar ou omitir.
-5. **Login sem credenciais pré-preenchidas** na UI.
+- Termo de consentimento específico para dados de saúde e política de retenção/exclusão (LGPD, art. 11)
+- Protocolo clínico para `safety_alerts`: quem é avisado e em quanto tempo
+- Verificação do CRP junto ao conselho (hoje só o formato é validado)
+- HTTPS obrigatório, segredos gerenciados fora do repositório e rotação periódica
+- Revogação de refresh tokens (lista de sessões) e registro em `audit_logs` dos acessos a dados sensíveis
 
----
+## Boas práticas do repositório
 
-## 2. Autenticação (JWT)
-
-| Item | Implementação Distac |
-|------|----------------------|
-| Onde fica o token | Cookie **`httpOnly`** (`access_token`, `refresh_token`) — **não** `localStorage` |
-| SameSite | `lax` |
-| Secure | `true` quando `NODE_ENV=production` |
-| Access | ~15m (`JWT_ACCESS_EXPIRES`) |
-| Refresh | ~7d; renovado em `/api/auth/refresh` |
-| Secrets | `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` **obrigatórios** (sem fallback fraco) |
-| FE | `credentials: 'include'`; estado React só com perfil (`id`, `email`, `name`) |
-
-### Limitações conscientes (protótipo → endurecer em prod)
-
-| Risco | Mitigação atual | Próximo passo em prod |
-|-------|-----------------|------------------------|
-| Refresh roubado | Expira; usuário inactive bloqueia | Store/revogação de refresh no banco |
-| CSRF | SameSite=lax + CORS restrito | Token CSRF se necessário |
-| Secrets de dev | Aviso se contém `change-in-prod` | Secrets fortes + rotação |
-
----
-
-## 3. Proteção da API
-
-| Controle | Detalhe |
-|----------|---------|
-| Helmet | Headers (ex.: `x-content-type-options: nosniff`) |
-| Rate limit global | 300 req/min (Throttler) |
-| Rate limit login | 10/min → **429** |
-| Rate limit refresh | 20/min |
-| CORS | `CORS_ORIGIN` (ex.: `http://localhost:5173`) + credentials |
-| ValidationPipe | whitelist + forbidNonWhitelisted |
-| Auth guard | **Global** `JwtAuthGuard` (Zero Trust); só `@Public()` em health + login/refresh/logout |
-| Health | `/api/health` sem throttle e sem JWT |
-
----
-
-## 4. Banco — integridade e auditoria
-
-Ver [`database/info/triggers.md`](../../database/info/triggers.md).
-
-| Camada | Função |
-|--------|--------|
-| BEFORE | Regras (qty, preço, cliente ativo, pedido cancelado) |
-| AFTER (itens) | Recalcula `orders.total` |
-| AFTER (DML) | Grava `audit_log` |
-
-### Anonimização / omissão de sensíveis
-
-| Dado | Tratamento |
-|------|------------|
-| `user.password_hash` | **Omitido** do JSON em `audit_log` (`to_jsonb(...) - 'password_hash'`) |
-| Tokens JWT | Só em cookie httpOnly; não persistidos em tabela neste protótipo |
-| Senhas | bcrypt; nunca em log de aplicação |
-| `.env` | gitignored |
-
-**Regra para novos projetos:** ao auditar tabelas com PII/segredos (CPF, cartão, token, hash), **omitir ou mascarar** no trigger/`audit_log` e documentar a lista de campos aqui.
-
----
-
-## 5. Frontend
-
-- Sem senha/e-mail seed nos inputs de login.
-- Sem JWT em `localStorage` / `sessionStorage`.
-- Erros de API sem vazar stack/secrets ao usuário.
-
----
-
-## 6. Checklist rápido (Gate / PR)
-
-- [ ] Secrets só em env
-- [ ] Cookies httpOnly; Secure em prod
-- [ ] Rate limit no login
-- [ ] Rotas de negócio autenticadas
-- [ ] Auditoria sem hashes/senhas
-- [ ] `node tests/load/run-node.mjs` (ou equivalente) passou no ambiente local
-- [ ] Sem credenciais reais no README de produção (seed só em local)
-
----
-
-## 7. Arquivos-chave no código
-
-| Área | Caminho |
-|------|---------|
-| Cookies / login | `backend/src/auth/auth.controller.ts` |
-| JWT strategy / guard | `jwt.strategy.ts` · `jwt-auth.guard.ts` (APP_GUARD) |
-| Rotas públicas | `@Public()` em `common/public.decorator.ts` |
-| Helmet / CORS | `backend/src/main.ts` |
-| Throttler + JWT global | `backend/src/app.module.ts` |
-| Triggers + audit | `database/sql/03-triggers.sql` |
-| Cliente HTTP | `frontend/src/lib/api.ts` |
+- `.env` nunca é versionado (ver `.gitignore`); use `.env.example` como modelo
+- Não coloque tokens do GitHub na URL do remote (`git remote -v` os expõe); prefira o Git Credential Manager ou SSH

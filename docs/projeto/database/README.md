@@ -11,5 +11,5 @@ Pasta operacional na raiz:
 | `database/sql/` | role, DB, `03-triggers.sql` |
 | `backend/prisma/` | schema + migrations |
 
-Segurança / escala: [`../seguranca.md`](../seguranca.md) · [`../escalabilidade.md`](../escalabilidade.md)  
+Segurança: [`../seguranca.md`](../seguranca.md) · Tabelas: [`../mapa-entidades.md`](../mapa-entidades.md)
 Domínio: [`../mapa-entidades.md`](../mapa-entidades.md)
