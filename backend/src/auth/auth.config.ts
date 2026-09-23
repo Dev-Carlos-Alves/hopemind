@@ -18,10 +18,15 @@ export const accessSecret = () => requireEnv('JWT_ACCESS_SECRET');
 export const refreshSecret = () => requireEnv('JWT_REFRESH_SECRET');
 
 export function cookieOptions(maxAge?: number): CookieOptions {
+  // In production the API and the frontend are on different origins (e.g. Render + a
+  // separately hosted site), so the cookie needs SameSite=None — which browsers only
+  // accept together with Secure. Locally, both run on http://localhost, where
+  // SameSite=Lax works and Secure would block the cookie entirely (no HTTPS).
+  const production = process.env.NODE_ENV === 'production';
   return {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: production,
+    sameSite: production ? 'none' : 'lax',
     path: '/',
     ...(maxAge ? { maxAge } : {}),
   };

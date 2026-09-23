@@ -1,0 +1,36 @@
+# Render Blueprint — deploys the HopeMind API as a free web service.
+# Usage: Render dashboard → New → Blueprint → point at this repo. Render reads this file
+# and creates the service below; you only need to fill in the "sync: false" secrets
+# (DATABASE_URL, DIRECT_URL, JWT_ACCESS_SECRET, JWT_REFRESH_SECRET) in its dashboard —
+# copy DATABASE_URL/DIRECT_URL from the Supabase project (see database/README.md).
+services:
+  - type: web
+    name: hopemind-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRES
+        value: 15m
+      - key: JWT_REFRESH_EXPIRES
+        value: 7d
+      - key: CORS_ORIGIN
+        # Comma-separated origins allowed to call the API with cookies (the mobile app
+        # doesn't need to be listed — it isn't a browser, so CORS doesn't apply to it).
+        # Add your deployed frontend's URL here once it exists; http://localhost:5173
+        # covers running the web frontend locally against this hosted API.
+        value: http://localhost:5173,http://127.0.0.1:5173

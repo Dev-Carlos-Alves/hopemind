@@ -53,6 +53,12 @@ npm test
 
 Cobre as regras do algoritmo de match: fórmula, pesos, cada filtro, fluxo de segurança e validação das respostas.
 
+### Hospedar a API (opcional)
+
+Por padrão a API só roda enquanto `npm run dev` estiver aberto. Para o site e o app mobile
+funcionarem sem o seu PC ligado, dá para hospedar a API de graça no Render —
+veja [docs/projeto/deploy-api.md](docs/projeto/deploy-api.md).
+
 ---
 
 ## Contas de demonstração

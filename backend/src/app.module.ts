@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { TriageModule } from './triage/triage.module';
+import { AppController } from './app.controller';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { GeoModule } from './geo/geo.module';
 
@@ -19,6 +20,7 @@ import { GeoModule } from './geo/geo.module';
     TriageModule,
     AppointmentsModule,
   ],
+  controllers: [AppController],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
