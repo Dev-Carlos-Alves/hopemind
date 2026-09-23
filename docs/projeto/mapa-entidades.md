@@ -1,127 +1,120 @@
-# Mapa de Entidades — HopeMind (Padrão Prottus)
+# Mapa de Entidades — HopeMind
 
-O modelo de dados do **HopeMind** é construído no banco PostgreSQL com Prisma ORM. Todas as tabelas e colunas utilizam a linguagem **Inglês** no banco de dados e no backend, mantendo o frontend (interface do usuário) em **Português**.
+Banco **MariaDB / MySQL** com Prisma ORM (`backend/prisma/schema.prisma`). Tabelas e colunas em **inglês**; interface em **português**. DDL de referência: [`database/sql/hopemind_schema.sql`](../../database/sql/hopemind_schema.sql).
 
 ---
 
-## Entidades Principais
+## Entidades
 
 ```mermaid
 erDiagram
-    User ||--o| Patient : "is a (optional)"
-    User ||--o| Psychologist : "is a (optional)"
-    Patient ||--o{ PatientTag : "has"
-    Psychologist ||--o{ PsychologistTag : "has"
-    Tag ||--o{ PatientTag : "categorizes"
-    Tag ||--o{ PsychologistTag : "categorizes"
-    TriageQuestion ||--o{ TriageOption : "contains"
-    Tag ||--o| TriageOption : "maps to"
-    Patient ||--o{ PatientAnswer : "answers"
-    Psychologist ||--o{ PsychologistAnswer : "answers"
-    Patient ||--o{ Appointment : "schedules"
-    Psychologist ||--o{ Appointment : "attends"
-    User ||--o{ AuditLog : "triggers"
+    User ||--o| Patient : "é (opcional)"
+    User ||--o| Psychologist : "é (opcional)"
+    User ||--o{ TriageSubmission : "responde"
+    TriageSubmission ||--o| SafetyAlert : "pode abrir"
+    Patient ||--o{ SafetyAlert : "tem"
+    Patient ||--o{ MatchRun : "recebe"
+    TriageSubmission ||--o{ MatchRun : "origina"
+    Patient ||--o{ Appointment : "agenda"
+    Psychologist ||--o{ Appointment : "atende"
+    User ||--o{ AuditLog : "gera"
 ```
 
+As **perguntas** dos questionários não ficam no banco: elas são definidas em código (`backend/src/triage/questionnaire/`) e versionadas pelo git, como pede a seção 12 do documento de requisitos. Cada resposta registra a versão do questionário respondido.
+
 ---
 
-## Dicionário de Tabelas
+## Dicionário de tabelas
 
 ### 1. `users`
-Cadastros base de autenticação do sistema (Pacientes ou Psicólogos).
+Conta de acesso (paciente, psicólogo ou admin).
 
 | Coluna | Tipo | Descrição |
 |--------|------|-----------|
-| `id` | UUID / Int (PK) | Identificador único do usuário |
-| `email` | String (Unique) | E-mail corporativo/pessoal |
-| `password_hash` | String | Hash seguro PBKDF2/Bcrypt |
+| `id` | Int (PK) | Identificador |
+| `email` | String (único) | E-mail de login |
+| `password_hash` | String | Hash bcrypt |
 | `name` | String | Nome completo |
-| `cpf` | String (Unique) | Cadastro de Pessoa Física |
-| `phone` | String | Telefone de contato |
-| `birth_date` | Date | Data de nascimento |
-| `gender` | String | Gênero |
-| `user_type` | Enum (`PATIENT`, `PSYCHOLOGIST`, `ADMIN`) | Papel do usuário no sistema |
-| `is_active` | Boolean | Status do cadastro (Ativo/Inativo) |
-| `created_at` | Timestamp | Data de cadastro |
-| `updated_at` | Timestamp | Última alteração |
-
----
+| `cpf` | String (único) | CPF (somente dígitos) |
+| `phone` | String | Celular (somente dígitos) |
+| `birth_date` | Date | Nascimento — define a faixa etária no filtro do match |
+| `gender` | String | Gênero — usado só se o paciente declarar preferência (P17) |
+| `user_type` | Enum `PATIENT` · `PSYCHOLOGIST` · `ADMIN` | Papel |
+| `is_active` | Boolean | Conta ativa |
+| `created_at` / `updated_at` | DateTime | Auditoria |
 
 ### 2. `patients`
-Dados específicos do perfil de paciente.
-
 | Coluna | Tipo | Descrição |
 |--------|------|-----------|
-| `id` | UUID / Int (PK) | Identificador do perfil de paciente |
-| `user_id` | FK -> `users.id` | Vínculo com a conta de usuário |
-| `main_complaint` | Text | Queixa principal / motivo da busca |
-
----
+| `id` | Int (PK) | Perfil do paciente |
+| `user_id` | FK → `users.id` | Conta |
+| `main_complaint` | Text | Queixa principal (texto livre, opcional) |
 
 ### 3. `psychologists`
-Dados específicos do perfil profissional.
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| `id` | Int (PK) | Perfil profissional |
+| `user_id` | FK → `users.id` | Conta |
+| `crp` | String (único) | Registro no Conselho Regional de Psicologia |
+| `specialty` | String | Especialidade exibida no perfil |
+| `therapeutic_approach` | String | Abordagem exibida no perfil |
+| `biography` | Text | Apresentação |
+| `session_fee` | Decimal | Valor da sessão (R$) |
+| `contact_link` | String | Link de contato (opcional) |
+
+### 4. `triage_submissions`
+Cada envio de questionário. O mais recente de cada usuário é o perfil vigente; os anteriores ficam como histórico.
 
 | Coluna | Tipo | Descrição |
 |--------|------|-----------|
-| `id` | UUID / Int (PK) | Identificador do perfil de psicólogo |
-| `user_id` | FK -> `users.id` | Vínculo com a conta de usuário |
-| `crp` | String (Unique) | Registro profissional CRP |
-| `contact_link` | String | Link de agendamento/WhatsApp |
-| `specialty` | String | Especialidade principal (ex: TCC, Psicanálise) |
-| `therapeutic_approach` | String | Abordagem terapêutica |
-| `biography` | Text | Breve biografia / resumo profissional |
-| `session_fee` | Decimal | Valor por sessão (R$) |
+| `id` | Int (PK) | Envio |
+| `user_id` | FK → `users.id` | Quem respondeu |
+| `audience` | Enum `PATIENT` · `PSYCHOLOGIST` | Qual questionário |
+| `questionnaire_version` | String | Ex.: `hm-paciente-2026.1` |
+| `answers` | JSON | Respostas por código (`P01`, `S06`…), já validadas |
+| `safety_level` | Enum `NONE` · `WANTS_TALK` · `ELEVATED` · `IMMEDIATE` | Resultado do fluxo de segurança (P26/P27) |
+| `created_at` | DateTime | Momento do envio |
 
----
-
-### 4. `tags`
-Categorias de características, abordagens e preferências de triagem.
+### 5. `safety_alerts`
+Aberto quando o paciente indica risco. **Não influencia o ranking** — serve para acompanhamento pela equipe clínica.
 
 | Coluna | Tipo | Descrição |
 |--------|------|-----------|
-| `id` | UUID / Int (PK) | Identificador da Tag |
-| `code` | String (Unique) | Código da Tag (ex: `ANXIETY`, `DEPRESSION`, `CBT`) |
-| `name` | String | Nome legível em português |
-| `category` | String | Categoria da Tag |
+| `id` | Int (PK) | Alerta |
+| `patient_id` | FK → `patients.id` | Paciente |
+| `submission_id` | FK → `triage_submissions.id` (único) | Envio que originou |
+| `level` | Enum (mesmo de `safety_level`) | Gravidade |
+| `status` | Enum `OPEN` · `ACKNOWLEDGED` · `RESOLVED` | Acompanhamento |
+| `created_at` / `resolved_at` | DateTime | Datas |
 
----
+### 6. `match_runs`
+Registro de cada recomendação entregue, para auditoria e comparação entre versões do algoritmo.
 
-### 5. `triage_questions` & `triage_options`
-Questionário dinâmico de triagem.
-
-- `triage_questions`: `id`, `target_audience` (`PATIENT`, `PSYCHOLOGIST`, `BOTH`), `question_text`, `order`
-- `triage_options`: `id`, `question_id` (FK), `tag_id` (FK opcional), `option_text`
-
----
-
-### 6. `patient_tags` & `psychologist_tags`
-Tabelas de relacionamento de tags identificadas na triagem para cálculo de % de Match.
-
----
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| `id` | Int (PK) | Execução |
+| `patient_id` | FK → `patients.id` | Paciente |
+| `submission_id` | FK → `triage_submissions.id` | Respostas usadas |
+| `algorithm_version` | String | Ex.: `hm-match-1.0.0` |
+| `questionnaire_version` | String | Versão do questionário |
+| `results` | JSON | Psicólogos, score e componentes |
+| `created_at` | DateTime | Momento |
 
 ### 7. `appointments`
-Agendamento de sessões entre pacientes e psicólogos.
-
 | Coluna | Tipo | Descrição |
 |--------|------|-----------|
-| `id` | UUID / Int (PK) | Identificador da sessão |
-| `psychologist_id` | FK -> `psychologists.id` | Psicólogo responsável |
-| `patient_id` | FK -> `patients.id` | Paciente agendado |
-| `appointment_date` | Timestamp | Data e hora marcada |
-| `status` | Enum (`SCHEDULED`, `COMPLETED`, `CANCELLED`) | Status da sessão |
-| `created_at` | Timestamp | Registro |
-
----
+| `id` | Int (PK) | Sessão |
+| `psychologist_id` | FK → `psychologists.id` | Profissional |
+| `patient_id` | FK → `patients.id` | Paciente |
+| `appointment_date` | DateTime | Data e hora (sessões de 50 min, sem sobreposição) |
+| `status` | Enum `SCHEDULED` · `COMPLETED` · `CANCELLED` | Situação |
 
 ### 8. `audit_logs`
-Logs de auditoria e segurança.
-
 | Coluna | Tipo | Descrição |
 |--------|------|-----------|
-| `id` | BigInt / Int (PK) | Registro de auditoria |
-| `entity_name` | String | Tabela modificada |
-| `entity_id` | String | ID do registro afetado |
-| `action` | String | Ação (`INSERT`, `UPDATE`, `DELETE`, `LOGIN`) |
-| `payload` | JSON | Dados anteriores / novos |
-| `user_id` | FK -> `users.id` | Autor da ação |
-| `created_at` | Timestamp | Momento do evento |
+| `id` | BigInt (PK) | Registro |
+| `entity_name` / `entity_id` | String | Registro afetado |
+| `action` | String | Ação |
+| `payload` | JSON | Dados |
+| `user_id` | FK → `users.id` | Autor |
+| `created_at` | DateTime | Momento |

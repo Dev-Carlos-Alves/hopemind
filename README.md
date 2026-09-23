@@ -10,7 +10,7 @@
 |-------|---------------------------|--------------|
 | **Segurança** | Cookies `httpOnly` (JWT access + refresh), Helmet, Throttler rate limit, secrets no `.env` | [`docs/projeto/seguranca.md`](docs/projeto/seguranca.md) |
 | **Escalabilidade** | Paginação, filtros de busca, DTOs com `class-validator`, estatísticas de Match % | [`docs/projeto/escalabilidade.md`](docs/projeto/escalabilidade.md) |
-| **Domínio Claro** | `users`, `patients`, `psychologists`, `triage_questions`, `appointments`, `audit_logs` (Código em EN, UI em PT-BR) | [`docs/projeto/mapa-entidades.md`](docs/projeto/mapa-entidades.md) |
+| **Domínio Claro** | `users`, `patients`, `psychologists`, `triage_submissions`, `safety_alerts`, `match_runs`, `appointments`, `audit_logs` (Código em EN, UI em PT-BR) | [`docs/projeto/mapa-entidades.md`](docs/projeto/mapa-entidades.md) |
 | **Banco Operacional** | MariaDB / MySQL local automatizado com seed e migrações transparentes | [`database/README.md`](database/README.md) |
 | **Design System** | Variáveis CSS `--brand-primary`, densidade de controles 32px, ícones vetoriais sem emojis | [`docs/safemindlive/design-system.md`](docs/safemindlive/design-system.md) |
 

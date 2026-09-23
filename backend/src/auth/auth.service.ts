@@ -90,7 +90,7 @@ export class AuthService {
 
     return {
       ...(await this.issueTokens(payload)),
-      user: { ...this.publicUser(payload), hasTriage: await this.hasTriage(payload) },
+      user: { ...this.publicUser(payload), hasTriage: await this.hasTriage(user.id) },
     };
   }
 
@@ -154,12 +154,7 @@ export class AuthService {
       throw new UnauthorizedException('Usuário não encontrado.');
     }
 
-    const hasTriage = await this.hasTriage({
-      patientId: user.patient?.id ?? null,
-      psychologistId: user.psychologist?.id ?? null,
-    });
-
-    return { ...user, hasTriage };
+    return { ...user, hasTriage: await this.hasTriage(user.id) };
   }
 
   private async issueTokens(payload: JwtPayload) {
@@ -179,13 +174,7 @@ export class AuthService {
     };
   }
 
-  private async hasTriage(p: Pick<JwtPayload, 'patientId' | 'psychologistId'>) {
-    if (p.patientId) {
-      return !!(await this.prisma.patientAnswer.findFirst({ where: { patientId: p.patientId } }));
-    }
-    if (p.psychologistId) {
-      return !!(await this.prisma.psychologistAnswer.findFirst({ where: { psychologistId: p.psychologistId } }));
-    }
-    return false;
+  private async hasTriage(userId: number) {
+    return !!(await this.prisma.triageSubmission.findFirst({ where: { userId }, select: { id: true } }));
   }
 }

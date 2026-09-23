@@ -1,30 +1,34 @@
-import { Body, Controller, ForbiddenException, Get, Param, ParseIntPipe, Post, Query, Req } from '@nestjs/common';
-import { TriageService } from './triage.service';
+import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { SubmitTriageDto } from './dto/submit-triage.dto';
+import { TriageService } from './triage.service';
 
 @ApiTags('Triage & Match')
-@Controller()
+@Controller('api')
 export class TriageController {
   constructor(private triageService: TriageService) {}
 
-  @Get('api/triage/questions')
-  @ApiOperation({ summary: 'Obter perguntas da triagem' })
-  async getQuestions(@Query('tipo') tipo?: string) {
-    return this.triageService.getQuestions(tipo);
+  @Get('triage/questionnaire')
+  @ApiOperation({ summary: 'Questionário (paciente ou psicólogo) conforme o perfil logado' })
+  getQuestionnaire(@Req() req: any) {
+    return this.triageService.getQuestionnaire(req.user);
   }
 
-  @Post('api/triage/submit')
-  @ApiOperation({ summary: 'Submeter respostas de triagem' })
-  async submitTriage(@Req() req: any, @Body() body: any) {
-    return this.triageService.submitTriage(req.user.sub, body.tipo, body.respostas);
+  @Get('triage/me')
+  @ApiOperation({ summary: 'Últimas respostas do usuário logado (para revisar o questionário)' })
+  getMine(@Req() req: any) {
+    return this.triageService.getMySubmission(req.user);
   }
 
-  @Get('api/matches/:pacienteId')
-  @ApiOperation({ summary: 'Obter recomendação de psicólogos com % de Match para um paciente' })
-  async getMatches(@Req() req: any, @Param('pacienteId', ParseIntPipe) pacienteId: number) {
-    if (req.user.patientId !== pacienteId) {
-      throw new ForbiddenException('Você só pode consultar as suas próprias recomendações.');
-    }
-    return this.triageService.getMatches(pacienteId);
+  @Post('triage/submissions')
+  @ApiOperation({ summary: 'Enviar respostas; avalia o fluxo de segurança do paciente' })
+  submit(@Req() req: any, @Body() body: SubmitTriageDto) {
+    return this.triageService.submit(req.user, body.answers);
+  }
+
+  @Get('matches')
+  @ApiOperation({ summary: 'Recomendações do paciente logado, com razões explicáveis' })
+  getMatches(@Req() req: any) {
+    return this.triageService.getMatches(req.user);
   }
 }

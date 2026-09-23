@@ -1,143 +1,163 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { ALGORITHM_VERSION, findMatches, PsychologistProfile } from './match/match-engine';
+import { evaluateSafety, SUPPORT_RESOURCES } from './match/safety';
+import { AnswerValidationError, Answers, Audience, questionnaireFor, sanitizeAnswers } from './questionnaire';
+import { APPROACHES, labelOf } from './questionnaire/catalog';
+
+interface AuthUser {
+  sub: number;
+  userType: 'PATIENT' | 'PSYCHOLOGIST' | 'ADMIN';
+  patientId: number | null;
+  psychologistId: number | null;
+}
+
+const audienceOf = (user: AuthUser): Audience => {
+  if (user.userType === 'PATIENT' || user.userType === 'PSYCHOLOGIST') return user.userType;
+  throw new ForbiddenException('Questionário disponível apenas para pacientes e psicólogos.');
+};
 
 @Injectable()
 export class TriageService {
   constructor(private prisma: PrismaService) {}
 
-  async getQuestions(type?: string) {
-    const targetAudience = type === 'PSYCHOLOGIST' ? 'PSYCHOLOGIST' : type === 'PATIENT' ? 'PATIENT' : undefined;
-
-    const questions = await this.prisma.triageQuestion.findMany({
-      where: targetAudience
-        ? {
-            OR: [{ targetAudience: 'BOTH' }, { targetAudience: targetAudience as any }],
-          }
-        : undefined,
-      include: {
-        options: {
-          include: {
-            tag: true,
-          },
-        },
-      },
-      orderBy: { orderNum: 'asc' },
-    });
-
-    return questions.map((q) => ({
-      idPergunta: q.id,
-      textoPergunta: q.questionText,
-      opcoes: q.options.map((o) => ({
-        idOpcao: o.id,
-        idPergunta: o.questionId,
-        idTag: o.tagId,
-        textoOpcao: o.optionText,
-      })),
-    }));
+  getQuestionnaire(user: AuthUser) {
+    return questionnaireFor(audienceOf(user));
   }
 
-  async submitTriage(userId: number, type: string, respostas: Array<{ idPergunta: number; idOpcao: number }>) {
-    if (!respostas || !Array.isArray(respostas) || respostas.length === 0) {
-      throw new BadRequestException('Respostas de triagem não fornecidas.');
+  async getMySubmission(user: AuthUser) {
+    const submission = await this.latestSubmission(user.sub);
+    return submission
+      ? { questionnaireVersion: submission.questionnaireVersion, answers: submission.answers, submittedAt: submission.createdAt }
+      : null;
+  }
+
+  async submit(user: AuthUser, rawAnswers: Record<string, unknown>) {
+    const audience = audienceOf(user);
+    const questionnaire = questionnaireFor(audience);
+
+    let answers: Answers;
+    try {
+      answers = sanitizeAnswers(questionnaire, rawAnswers);
+    } catch (err) {
+      if (err instanceof AnswerValidationError) throw new BadRequestException(err.message);
+      throw err;
     }
 
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      include: { patient: true, psychologist: true },
-    });
+    const safetyLevel = audience === 'PATIENT' ? evaluateSafety(answers) : 'NONE';
 
-    if (!user) {
-      throw new BadRequestException('Usuário não encontrado.');
-    }
-
-    const options = await this.prisma.triageOption.findMany({
-      where: { id: { in: respostas.map((r) => Number(r.idOpcao)) } },
-    });
-    const optionById = new Map(options.map((o) => [o.id, o]));
-
-    for (const r of respostas) {
-      const option = optionById.get(Number(r.idOpcao));
-      if (!option || option.questionId !== Number(r.idPergunta)) {
-        throw new BadRequestException('Resposta inválida para a pergunta informada.');
-      }
-    }
-
-    const tagIds = Array.from(new Set(options.map((o) => o.tagId).filter((id): id is number => id !== null)));
-
-    // A new submission replaces the previous profile instead of piling up on top of it.
-    await this.prisma.$transaction(async (tx) => {
-      if (user.patient) {
-        const patientId = user.patient.id;
-        await tx.patientAnswer.deleteMany({ where: { patientId } });
-        await tx.patientTag.deleteMany({ where: { patientId } });
-        await tx.patientAnswer.createMany({
-          data: respostas.map((r) => ({ patientId, questionId: Number(r.idPergunta), optionId: Number(r.idOpcao) })),
+    const submission = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.triageSubmission.create({
+        data: {
+          userId: user.sub,
+          audience,
+          questionnaireVersion: questionnaire.version,
+          answers: answers as Prisma.InputJsonValue,
+          safetyLevel,
+        },
+      });
+      if (safetyLevel !== 'NONE' && user.patientId) {
+        await tx.safetyAlert.create({
+          data: { patientId: user.patientId, submissionId: created.id, level: safetyLevel },
         });
-        await tx.patientTag.createMany({ data: tagIds.map((tagId) => ({ patientId, tagId })) });
-      } else if (user.psychologist) {
-        const psychologistId = user.psychologist.id;
-        await tx.psychologistAnswer.deleteMany({ where: { psychologistId } });
-        await tx.psychologistTag.deleteMany({ where: { psychologistId } });
-        await tx.psychologistAnswer.createMany({
-          data: respostas.map((r) => ({ psychologistId, questionId: Number(r.idPergunta), optionId: Number(r.idOpcao) })),
-        });
-        await tx.psychologistTag.createMany({ data: tagIds.map((tagId) => ({ psychologistId, tagId })) });
       }
+      return created;
     });
 
     return {
-      message: 'Triagem enviada com sucesso.',
-      tags: tagIds,
+      message: 'Respostas salvas.',
+      submissionId: submission.id,
+      questionnaireVersion: questionnaire.version,
+      safety: this.safetyPayload(safetyLevel),
     };
   }
 
-  async getMatches(patientId: number) {
-    const patientTags = await this.prisma.patientTag.findMany({
-      where: { patientId },
-      select: { tagId: true },
-    });
+  async getMatches(user: AuthUser) {
+    if (!user.patientId) {
+      throw new ForbiddenException('Recomendações disponíveis apenas para pacientes.');
+    }
 
-    const patientTagIds = new Set(patientTags.map((pt) => pt.tagId));
-    if (patientTagIds.size === 0) {
-      return [];
+    const [submission, patientUser] = await Promise.all([
+      this.latestSubmission(user.sub),
+      this.prisma.user.findUnique({ where: { id: user.sub }, select: { birthDate: true } }),
+    ]);
+    if (!submission) {
+      throw new ConflictException('Responda o questionário para receber recomendações.');
     }
 
     const psychologists = await this.prisma.psychologist.findMany({
+      where: { user: { isActive: true } },
       include: {
-        user: { select: { name: true, email: true, phone: true } },
-        psychologistTags: { select: { tagId: true } },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            gender: true,
+            birthDate: true,
+            triageSubmissions: { orderBy: { createdAt: 'desc' }, take: 1 },
+          },
+        },
       },
     });
 
-    const totalPatientNeeds = patientTagIds.size;
-    const results = [];
+    const profiles: PsychologistProfile[] = psychologists
+      .filter((p) => p.user.triageSubmissions.length > 0)
+      .map((p) => ({
+        id: p.id,
+        answers: p.user.triageSubmissions[0].answers as Answers,
+        gender: p.user.gender,
+        birthDate: p.user.birthDate,
+      }));
 
-    for (const psi of psychologists) {
-      const psiTagIds = new Set(psi.psychologistTags.map((pt) => pt.tagId));
-      let intersectionCount = 0;
+    const outcome = findMatches(
+      { answers: submission.answers as Answers, birthDate: patientUser!.birthDate, safetyLevel: submission.safetyLevel },
+      profiles,
+    );
 
-      for (const tagId of Array.from(patientTagIds)) {
-        if (psiTagIds.has(tagId)) {
-          intersectionCount++;
-        }
-      }
+    await this.prisma.matchRun.create({
+      data: {
+        patientId: user.patientId,
+        submissionId: submission.id,
+        algorithmVersion: ALGORITHM_VERSION,
+        questionnaireVersion: submission.questionnaireVersion,
+        results: outcome.results.map(({ psychologistId, score, components }) => ({ psychologistId, score, components })),
+      },
+    });
 
-      const matchPercentage = Math.round((intersectionCount / totalPatientNeeds) * 100);
+    const byId = new Map(psychologists.map((p) => [p.id, p]));
+    return {
+      algorithmVersion: ALGORITHM_VERSION,
+      questionnaireVersion: submission.questionnaireVersion,
+      safety: this.safetyPayload(submission.safetyLevel),
+      evaluated: profiles.length,
+      excluded: outcome.excluded,
+      results: outcome.results.map((r) => {
+        const p = byId.get(r.psychologistId)!;
+        const psyAnswers = profiles.find((x) => x.id === p.id)!.answers;
+        return {
+          ...r,
+          psychologist: {
+            id: p.id,
+            name: p.user.name,
+            crp: p.crp,
+            specialty: p.specialty,
+            approaches: ((psyAnswers.S05 as string[]) ?? []).map((a) => labelOf(APPROACHES, a)),
+            biography: p.biography,
+            sessionFee: p.sessionFee,
+            modalities: (psyAnswers.S14 as string[]) ?? [],
+            city: (psyAnswers.S15 as string) || null,
+          },
+        };
+      }),
+    };
+  }
 
-      results.push({
-        idPsicologo: psi.id,
-        nome: psi.user.name,
-        especialidade: psi.specialty,
-        crp: psi.crp,
-        linkContato: psi.contactLink,
-        valorSessao: psi.sessionFee,
-        biografia: psi.biography,
-        matchPercentage,
-        foto: 'assets/images/perfil-rafael.png',
-      });
-    }
+  private latestSubmission(userId: number) {
+    return this.prisma.triageSubmission.findFirst({ where: { userId }, orderBy: { createdAt: 'desc' } });
+  }
 
-    results.sort((a, b) => b.matchPercentage - a.matchPercentage);
-    return results;
+  private safetyPayload(level: string) {
+    return { level, resources: level === 'NONE' ? [] : SUPPORT_RESOURCES };
   }
 }
