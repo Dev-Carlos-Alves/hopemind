@@ -56,8 +56,9 @@ export class AuthService {
   }
 
   async register(data: RegisterDto) {
+    // E-mails são gravados em minúsculas; no PostgreSQL a comparação diferencia maiúsculas.
     const existingUser = await this.prisma.user.findFirst({
-      where: { OR: [{ email: data.email }, { cpf: data.cpf }] },
+      where: { OR: [{ email: data.email.toLowerCase() }, { cpf: data.cpf }] },
     });
     if (existingUser) {
       throw new BadRequestException('E-mail ou CPF já cadastrados no sistema.');

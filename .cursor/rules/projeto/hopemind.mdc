@@ -20,7 +20,7 @@ Complementa `.cursor/rules/prottus/`.
 - `docs/projeto/design-system.md` — tokens e componentes de UI
 
 ## Stack
-- React 18 + Vite + TS (sem framework CSS) · NestJS · Prisma · **MariaDB/MySQL**
+- React 18 + Vite + TS (sem framework CSS) · NestJS · Prisma · **PostgreSQL (Supabase)**
 - Sessão: JWT access + refresh em cookie `httpOnly`; `JwtAuthGuard` e `ThrottlerGuard` globais; exceções com `@Public()`
 - Toda rota com corpo usa DTO com class-validator (o `ValidationPipe` rejeita campos extras)
 - Desenvolvimento: `npm run dev`; schema com `prisma db push`; `npm test` roda os testes do match

@@ -1,12 +1,12 @@
 ---
 name: hopemind-dev
-description: Subir, resetar e testar o HopeMind localmente (MariaDB + NestJS + Vite), e checklist para mudar o questionário ou o algoritmo de match.
+description: Subir, resetar e testar o HopeMind localmente (Supabase + NestJS + Vite), e checklist para mudar o questionário ou o algoritmo de match.
 ---
 
 # HopeMind — desenvolvimento local
 
 ## Subir
-1. MariaDB/MySQL rodando na 3306.
+1. `backend/.env` com `DATABASE_URL` e `DIRECT_URL` do Supabase (ver database/README.md).
 2. `.env.example` → `.env` e `backend/.env` (ajustar `DATABASE_URL`).
 3. `npm run install:all`
 4. `npm run setup` (primeira vez) ou `npm run db:reset` (apaga e recria com dados demo)

@@ -1,13 +1,16 @@
-// HopeMind - Prisma Schema (MariaDB / MySQL)
+// HopeMind - Prisma Schema (PostgreSQL / Supabase)
 // Enterprise Standard: Modelo Prottus
 
 generator client {
   provider = "prisma-client-js"
 }
 
+// Supabase: a API usa o pooler (DATABASE_URL, porta 6543) e o `prisma db push` usa a conexão
+// de sessão (DIRECT_URL, porta 5432), que aceita as mudanças de schema.
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum UserType {

@@ -10,6 +10,8 @@
     "migrate": "cd backend && npx prisma db push",
     "seed": "cd backend && npx prisma db seed",
     "db:reset": "cd backend && npx prisma db push --force-reset && npx prisma db seed",
+    "db:export": "cd backend && npx ts-node prisma/transfer.ts export",
+    "db:import": "cd backend && npx ts-node prisma/transfer.ts import",
     "test": "npm test --prefix backend",
     "build": "npm run build --prefix backend && npm run build --prefix frontend",
     "lint": "npm run lint --prefix backend && npm run lint --prefix frontend",

@@ -10,7 +10,7 @@ Antes de implementar qualquer funcionalidade ou realizar refatorações no HopeM
 - **Metodologia & Qualidade**: `docs/safemindlive/metodologia.md`
 - **Design System UI/UX**: `docs/safemindlive/design-system.md` e `docs/projeto/design-system.md`
 - **Arquitetura Web & Monólito Modular**: `docs/projeto/ARQUITETURA-WEB.md`
-- **Mapa de Entidades (MariaDB/MySQL via Prisma)**: `docs/projeto/mapa-entidades.md`
+- **Mapa de Entidades (PostgreSQL/Supabase via Prisma)**: `docs/projeto/mapa-entidades.md`
 - **Segurança (JWT httpOnly Cookies + Helmet)**: `docs/projeto/seguranca.md`
 
 ---

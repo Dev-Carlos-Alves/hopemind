@@ -1,6 +1,6 @@
 # Mapa de Entidades — HopeMind
 
-Banco **MariaDB / MySQL** com Prisma ORM (`backend/prisma/schema.prisma`). Tabelas e colunas em **inglês**; interface em **português**. DDL de referência: [`database/sql/hopemind_schema.sql`](../../database/sql/hopemind_schema.sql).
+Banco **PostgreSQL (Supabase)** com Prisma ORM (`backend/prisma/schema.prisma`). Tabelas e colunas em **inglês**; interface em **português**. DDL de referência: [`database/sql/hopemind_schema.sql`](../../database/sql/hopemind_schema.sql).
 
 ---
 

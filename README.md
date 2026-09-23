@@ -2,7 +2,7 @@
 
 **Terapia que combina com você.** O HopeMind conecta pacientes a psicólogos com o estilo de atendimento, a experiência e a agenda mais compatíveis — com um algoritmo determinístico, explicável e que nunca trata respostas de risco como pontuação.
 
-Projeto acadêmico da **SafeMindLive** · React + NestJS + MariaDB + Prisma · PWA.
+Projeto acadêmico da **SafeMindLive** · React + NestJS + PostgreSQL (Supabase) + Prisma · PWA.
 
 ---
 
@@ -20,13 +20,13 @@ Projeto acadêmico da **SafeMindLive** · React + NestJS + MariaDB + Prisma · P
 
 ## Como rodar
 
-Pré-requisitos: Node 18+ e MariaDB/MySQL rodando na porta 3306.
+Pré-requisitos: Node 18+ e um projeto gratuito no [Supabase](https://supabase.com) (o banco fica online, não precisa instalar nada).
 
 ```bash
 npm run install:all
 ```
 
-Copie `.env.example` para `.env` **e** para `backend/.env` e ajuste a `DATABASE_URL` (usuário/senha do seu banco).
+Copie `.env.example` para `.env` **e** para `backend/.env` e preencha `DATABASE_URL` e `DIRECT_URL` com as URLs do Supabase (passo a passo em [database/README.md](database/README.md)).
 
 ```bash
 npm run setup

@@ -25,7 +25,7 @@ hopemind/
 ├── .env.example         # Exemplo de configuração
 ├── README.md            # Documentação principal atualizada do HopeMind
 ├── package.json         # Scripts unificados de desenvolvimento e build
-├── backend/             # NestJS + Prisma ORM (MariaDB / MySQL)
+├── backend/             # NestJS + Prisma ORM (PostgreSQL / Supabase)
 ├── frontend/            # React 18 + Vite + TypeScript (PWA)
 └── docs/                # Documentação técnica e padrões da SafeMindLive
     ├── safemindlive/    # Metodologia e Design System corporativo

@@ -6,7 +6,7 @@
 |---|---|
 | API | NestJS (REST), módulos por domínio |
 | Front | React 18 + Vite + TypeScript, SPA instalável (PWA) |
-| Banco | MariaDB / MySQL + Prisma ORM (`prisma db push` em desenvolvimento) |
+| Banco | PostgreSQL no Supabase + Prisma ORM (`prisma db push`; pooler na porta 6543 para a API) |
 | Sessão | JWT de acesso (15 min) + refresh (7 dias) em cookies `httpOnly` |
 | Interface | Design system próprio, sem framework CSS ([`design-system.md`](design-system.md)) |
 
@@ -28,7 +28,7 @@ backend/ (NestJS)
   appointments/  agendamento com checagem de conflito
   prisma/        acesso ao banco
         │  Prisma
-MariaDB — users, patients, psychologists, triage_submissions,
+PostgreSQL (Supabase) — users, patients, psychologists, triage_submissions,
           safety_alerts, match_runs, appointments, audit_logs
 ```
 

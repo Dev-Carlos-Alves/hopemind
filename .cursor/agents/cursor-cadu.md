@@ -11,7 +11,7 @@
 | Item | Valor |
 |------|-------|
 | Produto | HopeMind (acadêmico) |
-| Stack | React+Vite+TS · NestJS · Prisma · MariaDB · JWT httpOnly |
+| Stack | React+Vite+TS · NestJS · Prisma · PostgreSQL (Supabase) · JWT httpOnly |
 | Match | Algoritmo `hm-match-1.0.0` conforme documento de requisitos, com testes |
 | UI | Design system próprio estilo Apple, claro/escuro, PWA |
 | Segurança | Rate limit, DTOs, IDOR corrigido, refresh token, CRP obrigatório |
