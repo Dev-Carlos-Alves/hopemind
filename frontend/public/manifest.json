@@ -1,0 +1,15 @@
+{
+  "short_name": "HopeMind",
+  "name": "HopeMind - Plataforma de Saúde Mental & Triagem Inteligente",
+  "icons": [
+    {
+      "src": "/images/logo-hopemind-full.png",
+      "type": "image/png",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#F8FAFC",
+  "theme_color": "#2E7D32",
+  "display": "standalone"
+}
