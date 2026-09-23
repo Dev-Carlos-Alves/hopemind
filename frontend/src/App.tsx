@@ -1,18 +1,25 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { AppShell } from './components/AppShell';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
-import { TriagePage } from './pages/TriagePage';
-import { PatientDashboardPage } from './pages/PatientDashboardPage';
+import { ToastProvider } from './context/ToastContext';
 import { AppointmentsPage } from './pages/AppointmentsPage';
+import { LoginPage } from './pages/LoginPage';
+import { PatientDashboardPage } from './pages/PatientDashboardPage';
+import { RegisterPage } from './pages/RegisterPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { TriagePage } from './pages/TriagePage';
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
-  if (loading) return <div style={{ padding: '20px', fontSize: '13px' }}>Carregando...</div>;
+const BootScreen: React.FC = () => (
+  <div className="boot" role="status" aria-label="Carregando HopeMind">
+    <img src="/images/emblema.png" alt="" />
+  </div>
+);
+
+const ProtectedLayout: React.FC = () => {
+  const { isAuthenticated } = useAuth();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  return <>{children}</>;
+  return <AppShell />;
 };
 
 const HomeRoute: React.FC = () => {
@@ -24,59 +31,33 @@ const HomeRoute: React.FC = () => {
 export const AppRoutes: React.FC = () => {
   const { isAuthenticated, loading } = useAuth();
 
-  if (loading) return <div style={{ padding: '20px', fontSize: '13px' }}>Carregando HopeMind...</div>;
+  if (loading) return <BootScreen />;
 
   return (
     <Routes>
       <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
       <Route path="/registro" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegisterPage />} />
 
-      <Route
-        path="/triagem"
-        element={
-          <ProtectedRoute>
-            <TriagePage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <HomeRoute />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/consultas"
-        element={
-          <ProtectedRoute>
-            <AppointmentsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/configuracoes"
-        element={
-          <ProtectedRoute>
-            <SettingsPage />
-          </ProtectedRoute>
-        }
-      />
+      <Route element={<ProtectedLayout />}>
+        <Route path="/dashboard" element={<HomeRoute />} />
+        <Route path="/triagem" element={<TriagePage />} />
+        <Route path="/consultas" element={<AppointmentsPage />} />
+        <Route path="/configuracoes" element={<SettingsPage />} />
+      </Route>
 
-      <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
+      <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
     </Routes>
   );
 };
 
-export const App: React.FC = () => {
-  return (
+export const App: React.FC = () => (
+  <ToastProvider>
     <AuthProvider>
       <BrowserRouter>
         <AppRoutes />
       </BrowserRouter>
     </AuthProvider>
-  );
-};
+  </ToastProvider>
+);
 
 export default App;

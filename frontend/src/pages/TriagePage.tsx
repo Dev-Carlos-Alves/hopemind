@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api, getErrorMessage } from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import { Header } from '../components/Header';
-import { Sidebar } from '../components/Sidebar';
 import { Icon } from '../components/Icon';
+import { Button, EmptyState, PageHeader, Skeleton } from '../components/ui';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
+import { api, getErrorMessage } from '../services/api';
 
 interface Option {
   idOpcao: number;
@@ -20,136 +20,125 @@ interface Question {
 
 export const TriagePage: React.FC = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
+  const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   const { user, refreshProfile } = useAuth();
+  const toast = useToast();
   const navigate = useNavigate();
+  const isPsychologist = user?.userType === 'PSYCHOLOGIST';
 
   useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        const res = await api.get('/triage/questions', {
-          params: { tipo: user?.userType },
-        });
-        setQuestions(res.data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchQuestions();
-  }, [user]);
+    api
+      .get<Question[]>('/triage/questions', { params: { tipo: user?.userType } })
+      .then((res) => setQuestions(res.data))
+      .catch((err) => toast.error(getErrorMessage(err, 'Não foi possível carregar o questionário.')))
+      .finally(() => setLoading(false));
+  }, [user?.userType, toast]);
 
-  const handleSelectOption = (questionId: number, optionId: number) => {
-    setSelectedAnswers((prev) => ({
-      ...prev,
-      [questionId]: optionId,
-    }));
-  };
+  const question = questions[step];
+  const isLast = step === questions.length - 1;
+  const progress = questions.length ? ((step + (question && answers[question.idPergunta] ? 1 : 0)) / questions.length) * 100 : 0;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = async () => {
     setSubmitting(true);
-
-    const payloadAnswers = Object.entries(selectedAnswers).map(([pId, oId]) => ({
-      idPergunta: Number(pId),
-      idOpcao: Number(oId),
-    }));
-
     try {
       await api.post('/triage/submit', {
-        tipo: user?.userType === 'PSYCHOLOGIST' ? 'Psicologo' : 'Paciente',
-        respostas: payloadAnswers,
+        tipo: isPsychologist ? 'Psicologo' : 'Paciente',
+        respostas: Object.entries(answers).map(([idPergunta, idOpcao]) => ({
+          idPergunta: Number(idPergunta),
+          idOpcao,
+        })),
       });
-
       await refreshProfile();
-      alert('Triagem concluída com sucesso! Calculando suas melhores recomendações...');
+      toast.success(isPsychologist ? 'Perfil de atendimento salvo.' : 'Pronto! Suas recomendações foram atualizadas.');
       navigate('/dashboard');
     } catch (err) {
-      alert(getErrorMessage(err, 'Não foi possível enviar a triagem.'));
+      toast.error(getErrorMessage(err, 'Não foi possível enviar suas respostas.'));
     } finally {
       setSubmitting(false);
     }
   };
 
-  return (
-    <div className="app-shell">
-      <Header />
-      <div className="main-container">
-        <Sidebar />
-        <main className="content-area">
-          <div className="module-header">
-            <h1 className="module-header__title">Triagem Inteligente de Perfil</h1>
-          </div>
+  const next = () => (isLast ? submit() : setStep((s) => s + 1));
 
-          <div className="card">
-            <div className="card__header">
-              <span>Questionário de Avaliação e Preferências</span>
-              <span className="badge badge-info">Passo Obrigatório</span>
+  return (
+    <>
+      <PageHeader
+        eyebrow={isPsychologist ? 'Perfil de atendimento' : 'Questionário'}
+        title={isPsychologist ? 'Como você atende' : 'Conte um pouco sobre você'}
+        subtitle={
+          isPsychologist
+            ? 'Suas respostas ajudam a indicar você aos pacientes que mais combinam com o seu estilo.'
+            : 'Não existe resposta certa. Isso não é um diagnóstico — serve só para entender suas preferências.'
+        }
+      />
+
+      <section className="card card--lg questionnaire">
+        {loading ? (
+          <div className="stack gap-4">
+            <Skeleton height={4} />
+            <Skeleton width="70%" height={26} />
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={56} radius={12} />
+            ))}
+          </div>
+        ) : !question ? (
+          <EmptyState title="Questionário indisponível" text="Tente novamente em instantes." />
+        ) : (
+          <>
+            <div className="stack gap-2">
+              <div className="row between t-footnote t-secondary">
+                <span>
+                  Pergunta {step + 1} de {questions.length}
+                </span>
+                <span>{Math.round(progress)}%</span>
+              </div>
+              <div className="progress" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
+                <div className="progress__bar" style={{ width: `${progress}%` }} />
+              </div>
             </div>
 
-            {loading ? (
-              <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Carregando perguntas...</p>
-            ) : (
-              <form onSubmit={handleSubmit}>
-                {questions.map((q, idx) => (
-                  <div
-                    key={q.idPergunta}
-                    style={{
-                      marginBottom: '20px',
-                      paddingBottom: '16px',
-                      borderBottom: idx < questions.length - 1 ? '1px solid var(--border-color)' : 'none',
-                    }}
-                  >
-                    <p style={{ fontWeight: '600', fontSize: '14px', marginBottom: '10px' }}>
-                      {idx + 1}. {q.textoPergunta}
-                    </p>
+            <fieldset className="questionnaire__step" key={question.idPergunta}>
+              <legend className="t-title-2 t-balance questionnaire__prompt">{question.textoPergunta}</legend>
+              <div className="stack gap-2" role="radiogroup">
+                {question.opcoes.map((o) => {
+                  const checked = answers[question.idPergunta] === o.idOpcao;
+                  return (
+                    <button
+                      key={o.idOpcao}
+                      type="button"
+                      role="radio"
+                      aria-checked={checked}
+                      className="option"
+                      onClick={() => setAnswers((a) => ({ ...a, [question.idPergunta]: o.idOpcao }))}
+                    >
+                      <span className="option__mark">{checked && <Icon name="check" size={14} strokeWidth={3} />}</span>
+                      <span className="option__text">{o.textoOpcao}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {q.opcoes.map((o) => {
-                        const isSelected = selectedAnswers[q.idPergunta] === o.idOpcao;
-                        return (
-                          <div
-                            key={o.idOpcao}
-                            onClick={() => handleSelectOption(q.idPergunta, o.idOpcao)}
-                            style={{
-                              padding: '10px 14px',
-                              borderRadius: '4px',
-                              border: isSelected ? '2px solid var(--brand-primary)' : '1px solid var(--border-color)',
-                              backgroundColor: isSelected ? '#E8F5E9' : '#FFFFFF',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              fontSize: '13px',
-                              transition: 'all 0.15s ease',
-                            }}
-                          >
-                            <span>{o.textoOpcao}</span>
-                            {isSelected && <Icon name="check" size={16} color="var(--brand-primary)" />}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={submitting || Object.keys(selectedAnswers).length < questions.length}
-                  style={{ marginTop: '16px', minWidth: '160px' }}
-                >
-                  {submitting ? 'Enviando...' : 'Concluir Triagem'}
-                </button>
-              </form>
-            )}
-          </div>
-        </main>
-      </div>
-    </div>
+            <div className="questionnaire__nav">
+              <Button variant="gray" icon="chevron-left" onClick={() => setStep((s) => s - 1)} disabled={step === 0}>
+                Voltar
+              </Button>
+              <Button
+                onClick={next}
+                loading={submitting}
+                disabled={!answers[question.idPergunta]}
+                iconRight={isLast ? 'check' : 'chevron-right'}
+              >
+                {isLast ? 'Concluir' : 'Continuar'}
+              </Button>
+            </div>
+          </>
+        )}
+      </section>
+    </>
   );
 };

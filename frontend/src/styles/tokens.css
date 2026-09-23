@@ -1,0 +1,202 @@
+/*
+ * HopeMind design tokens.
+ * Palette derived from the brand: sage (hands), sand (brain), peach (mascot).
+ * Every text/background pair used in the UI was checked for WCAG AA (>= 4.5:1).
+ */
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --bg: #f5f5f7;
+  --bg-elevated: #ffffff;
+  --bg-grouped-row: #ffffff;
+  --bg-brand: #fbf7ef;
+  --fill: rgba(120, 120, 128, 0.12);
+  --fill-soft: rgba(120, 120, 128, 0.07);
+  --fill-strong: rgba(120, 120, 128, 0.2);
+  --separator: rgba(60, 60, 67, 0.13);
+  --separator-strong: rgba(60, 60, 67, 0.22);
+
+  /* Labels */
+  --label: #1d1d1f;
+  --label-2: #6e6e73;
+  --label-3: #86868b;
+  --label-inverse: #ffffff;
+
+  /* Brand */
+  --tint: #3a7733;
+  --tint-hover: #336a2d;
+  --tint-pressed: #2c5c27;
+  --on-tint: #ffffff;
+  --tint-soft: #eaf4e4;
+  --tint-soft-label: #2f6429;
+  --sage: #7cc063;
+  --sand: #e9c987;
+  --sand-soft: #fbf3e2;
+  --sand-label: #8b6420;
+  --peach: #f2b173;
+  --peach-soft: #fdeedf;
+  --peach-label: #9a5418;
+
+  /* Semantic */
+  --danger: #c8342b;
+  --danger-soft: #fdeceb;
+  --warning-label: #8a5300;
+  --warning-soft: #fff3dc;
+
+  /* Materials (translucent chrome) */
+  --material: rgba(255, 255, 255, 0.72);
+  --material-thick: rgba(255, 255, 255, 0.86);
+  --material-border: rgba(0, 0, 0, 0.06);
+  --backdrop: rgba(0, 0, 0, 0.28);
+
+  /* Elevation */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 1px rgba(0, 0, 0, 0.02);
+  --shadow-2: 0 2px 6px rgba(0, 0, 0, 0.04), 0 10px 30px rgba(0, 0, 0, 0.06);
+  --shadow-3: 0 30px 80px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.08);
+  --ring: 0 0 0 4px rgba(58, 119, 51, 0.22);
+
+  /* Brand wash used behind auth screens and hero cards */
+  --wash:
+    radial-gradient(55% 50% at 12% 18%, rgba(124, 192, 99, 0.34), transparent 70%),
+    radial-gradient(45% 45% at 88% 12%, rgba(233, 201, 135, 0.5), transparent 70%),
+    radial-gradient(60% 60% at 70% 95%, rgba(242, 177, 115, 0.34), transparent 72%),
+    #fbf7ef;
+
+  /* Typography */
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+  --text-large-title: 34px;
+  --text-title-1: 28px;
+  --text-title-2: 22px;
+  --text-title-3: 20px;
+  --text-headline: 17px;
+  --text-body: 16px;
+  --text-callout: 15px;
+  --text-subhead: 14px;
+  --text-footnote: 13px;
+  --text-caption: 12px;
+
+  /* Shape */
+  --radius-xs: 8px;
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-pill: 999px;
+
+  /* Spacing (4pt grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 150ms;
+  --dur: 250ms;
+  --dur-slow: 400ms;
+
+  /* Layout */
+  --sidebar-w: 264px;
+  --content-max: 1080px;
+  --tabbar-h: 64px;
+  --control-h: 48px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #000000;
+    --bg-elevated: #1c1c1e;
+    --bg-grouped-row: #1c1c1e;
+    --bg-brand: #121211;
+    --fill: rgba(118, 118, 128, 0.24);
+    --fill-soft: rgba(118, 118, 128, 0.14);
+    --fill-strong: rgba(118, 118, 128, 0.36);
+    --separator: rgba(84, 84, 88, 0.55);
+    --separator-strong: rgba(84, 84, 88, 0.8);
+    --label: #f5f5f7;
+    --label-2: #a1a1a6;
+    --label-3: #7c7c82;
+    --label-inverse: #1d1d1f;
+    --tint: #8fcb7a;
+    --tint-hover: #9fd48c;
+    --tint-pressed: #7fb96b;
+    --on-tint: #0b1f07;
+    --tint-soft: rgba(143, 203, 122, 0.16);
+    --tint-soft-label: #a8d896;
+    --sand-soft: rgba(233, 201, 135, 0.14);
+    --sand-label: #e8c37e;
+    --peach-soft: rgba(242, 177, 115, 0.14);
+    --peach-label: #f4bd8a;
+    --danger: #ff6961;
+    --danger-soft: rgba(255, 105, 97, 0.16);
+    --warning-label: #ffc862;
+    --warning-soft: rgba(255, 200, 98, 0.14);
+    --material: rgba(28, 28, 30, 0.72);
+    --material-thick: rgba(28, 28, 30, 0.9);
+    --material-border: rgba(255, 255, 255, 0.08);
+    --backdrop: rgba(0, 0, 0, 0.5);
+    --shadow-1: 0 0 0 1px rgba(255, 255, 255, 0.04);
+    --shadow-2: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 10px 30px rgba(0, 0, 0, 0.4);
+    --shadow-3: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 30px 80px rgba(0, 0, 0, 0.6);
+    --ring: 0 0 0 4px rgba(143, 203, 122, 0.3);
+    --wash:
+      radial-gradient(55% 50% at 12% 18%, rgba(124, 192, 99, 0.2), transparent 70%),
+      radial-gradient(45% 45% at 88% 12%, rgba(233, 201, 135, 0.16), transparent 70%),
+      radial-gradient(60% 60% at 70% 95%, rgba(242, 177, 115, 0.16), transparent 72%),
+      #121211;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #000000;
+  --bg-elevated: #1c1c1e;
+  --bg-grouped-row: #1c1c1e;
+  --bg-brand: #121211;
+  --fill: rgba(118, 118, 128, 0.24);
+  --fill-soft: rgba(118, 118, 128, 0.14);
+  --fill-strong: rgba(118, 118, 128, 0.36);
+  --separator: rgba(84, 84, 88, 0.55);
+  --separator-strong: rgba(84, 84, 88, 0.8);
+  --label: #f5f5f7;
+  --label-2: #a1a1a6;
+  --label-3: #7c7c82;
+  --label-inverse: #1d1d1f;
+  --tint: #8fcb7a;
+  --tint-hover: #9fd48c;
+  --tint-pressed: #7fb96b;
+  --on-tint: #0b1f07;
+  --tint-soft: rgba(143, 203, 122, 0.16);
+  --tint-soft-label: #a8d896;
+  --sand-soft: rgba(233, 201, 135, 0.14);
+  --sand-label: #e8c37e;
+  --peach-soft: rgba(242, 177, 115, 0.14);
+  --peach-label: #f4bd8a;
+  --danger: #ff6961;
+  --danger-soft: rgba(255, 105, 97, 0.16);
+  --warning-label: #ffc862;
+  --warning-soft: rgba(255, 200, 98, 0.14);
+  --material: rgba(28, 28, 30, 0.72);
+  --material-thick: rgba(28, 28, 30, 0.9);
+  --material-border: rgba(255, 255, 255, 0.08);
+  --backdrop: rgba(0, 0, 0, 0.5);
+  --shadow-1: 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-2: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 10px 30px rgba(0, 0, 0, 0.4);
+  --shadow-3: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 30px 80px rgba(0, 0, 0, 0.6);
+  --ring: 0 0 0 4px rgba(143, 203, 122, 0.3);
+  --wash:
+    radial-gradient(55% 50% at 12% 18%, rgba(124, 192, 99, 0.2), transparent 70%),
+    radial-gradient(45% 45% at 88% 12%, rgba(233, 201, 135, 0.16), transparent 70%),
+    radial-gradient(60% 60% at 70% 95%, rgba(242, 177, 115, 0.16), transparent 72%),
+    #121211;
+}

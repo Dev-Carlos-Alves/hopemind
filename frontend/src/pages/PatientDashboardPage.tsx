@@ -1,227 +1,212 @@
-import React, { useEffect, useState } from 'react';
-import { api, getErrorMessage } from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import { Header } from '../components/Header';
-import { Sidebar } from '../components/Sidebar';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { BookablePsychologist, BookingSheet } from '../components/BookingSheet';
 import { Icon } from '../components/Icon';
+import { Avatar, Button, EmptyState, Mascot, PageHeader, Skeleton } from '../components/ui';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
+import { api, getErrorMessage } from '../services/api';
+import { currency, firstName, greeting } from '../services/format';
 
 interface PsychologistMatch {
   idPsicologo: number;
   nome: string;
   especialidade: string;
   crp: string;
-  linkContato: string;
-  valorSessao: number;
-  biografia: string;
+  valorSessao: number | string;
+  biografia: string | null;
   matchPercentage: number;
-  foto: string;
 }
 
+function compatibility(percent: number) {
+  if (percent >= 70) return { label: 'Alta compatibilidade', tone: 'pill--tint' };
+  if (percent >= 40) return { label: 'Boa compatibilidade', tone: 'pill--sand' };
+  return { label: 'Compatibilidade parcial', tone: '' };
+}
+
+const MatchCard: React.FC<{ match: PsychologistMatch; onBook: () => void; index: number }> = ({ match, onBook, index }) => {
+  const c = compatibility(match.matchPercentage);
+  return (
+    <article className="card card--lg match-card animate-rise" style={{ animationDelay: `${index * 60}ms` }}>
+      <div className="row gap-4" style={{ alignItems: 'flex-start' }}>
+        <Avatar name={match.nome} size="lg" />
+        <div className="grow">
+          <h3 className="t-headline">{match.nome}</h3>
+          <p className="t-footnote t-secondary">{match.crp}</p>
+          <div className="row gap-2 wrap" style={{ marginTop: 8 }}>
+            <span className={`pill pill--dot ${c.tone}`}>{c.label}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="stack gap-2">
+        <p className="t-subhead" style={{ fontWeight: 600 }}>
+          {match.especialidade}
+        </p>
+        <p className="t-subhead t-secondary match-card__bio">
+          {match.biografia || 'Atendimento clínico para adultos e jovens adultos.'}
+        </p>
+      </div>
+
+      <div className="match-card__footer">
+        <div>
+          <p className="t-headline">{currency.format(Number(match.valorSessao || 0))}</p>
+          <p className="t-caption t-secondary">por sessão</p>
+        </div>
+        <Button variant="tinted" icon="calendar" onClick={onBook}>
+          Ver horários
+        </Button>
+      </div>
+    </article>
+  );
+};
+
+const MatchSkeleton: React.FC = () => (
+  <div className="card card--lg match-card" aria-hidden>
+    <div className="row gap-4">
+      <Skeleton width={64} height={64} radius={32} />
+      <div className="grow stack gap-2">
+        <Skeleton width="60%" height={18} />
+        <Skeleton width="35%" height={12} />
+      </div>
+    </div>
+    <Skeleton height={12} />
+    <Skeleton width="80%" height={12} />
+    <div className="match-card__footer">
+      <Skeleton width={90} height={22} />
+      <Skeleton width={130} height={44} radius={22} />
+    </div>
+  </div>
+);
+
 export const PatientDashboardPage: React.FC = () => {
-  const [matches, setMatches] = useState<PsychologistMatch[]>([]);
-  const [filteredMatches, setFilteredMatches] = useState<PsychologistMatch[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  // Modal State
-  const [selectedPsi, setSelectedPsi] = useState<PsychologistMatch | null>(null);
-  const [appointmentDate, setAppointmentDate] = useState('');
-  const [bookingLoading, setBookingLoading] = useState(false);
-
   const { user } = useAuth();
+  const toast = useToast();
+  const [matches, setMatches] = useState<PsychologistMatch[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState('');
+  const [selected, setSelected] = useState<BookablePsychologist | null>(null);
 
   useEffect(() => {
-    const fetchMatches = async () => {
-      if (!user?.patientId) {
-        setLoading(false);
-        return;
-      }
-      try {
-        const res = await api.get(`/matches/${user.patientId}`);
-        setMatches(res.data);
-        setFilteredMatches(res.data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchMatches();
-  }, [user]);
-
-  useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredMatches(matches);
-    } else {
-      const lower = searchTerm.toLowerCase();
-      setFilteredMatches(
-        matches.filter(
-          (m) =>
-            m.nome.toLowerCase().includes(lower) ||
-            m.especialidade.toLowerCase().includes(lower),
-        ),
-      );
+    if (!user?.patientId || !user.hasTriage) {
+      setLoading(false);
+      return;
     }
-  }, [searchTerm, matches]);
+    api
+      .get<PsychologistMatch[]>(`/matches/${user.patientId}`)
+      .then((res) => setMatches(res.data))
+      .catch((err) => toast.error(getErrorMessage(err, 'Não foi possível carregar suas recomendações.')))
+      .finally(() => setLoading(false));
+  }, [user, toast]);
 
-  const handleOpenBookingModal = (psi: PsychologistMatch) => {
-    setSelectedPsi(psi);
-    // Set default tomorrow at 14:00
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(14, 0, 0, 0);
-    setAppointmentDate(tomorrow.toISOString().slice(0, 16));
-  };
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return matches;
+    return matches.filter((m) => `${m.nome} ${m.especialidade}`.toLowerCase().includes(q));
+  }, [matches, query]);
 
-  const handleConfirmBooking = async () => {
-    if (!selectedPsi || !user?.patientId || !appointmentDate) return;
-
-    setBookingLoading(true);
-    try {
-      await api.post('/sessoes/agendar', {
-        idPsicologo: selectedPsi.idPsicologo,
-        dataHora: new Date(appointmentDate).toISOString(),
-      });
-
-      alert(`Sessão com ${selectedPsi.nome} agendada com sucesso!`);
-      setSelectedPsi(null);
-    } catch (err) {
-      alert(getErrorMessage(err, 'Não foi possível agendar a sessão.'));
-    } finally {
-      setBookingLoading(false);
-    }
-  };
+  const name = user ? firstName(user.name) : '';
 
   return (
-    <div className="app-shell">
-      <Header />
-      <div className="main-container">
-        <Sidebar />
-        <main className="content-area">
-          <div className="module-header">
-            <h1 className="module-header__title">Psicólogos Recomendados & Match</h1>
-          </div>
+    <>
+      <PageHeader
+        eyebrow="Para você"
+        title={`${greeting()}, ${name}`}
+        subtitle={
+          user?.hasTriage
+            ? 'Estes são os profissionais cujo estilo de atendimento mais combina com o que você nos contou.'
+            : 'Para recomendarmos profissionais, precisamos conhecer um pouco do que você procura.'
+        }
+      />
 
-          <div className="filter-bar">
-            <span className="filter-bar__label">Filtrar por:</span>
-            <div style={{ position: 'relative', flex: 1, maxWidth: '300px' }}>
+      {!user?.hasTriage ? (
+        <section className="hero">
+          <div className="stack gap-4">
+            <h2 className="t-title-1 t-balance">Vamos encontrar alguém que combine com você</h2>
+            <p className="t-callout t-secondary" style={{ maxWidth: 480 }}>
+              São perguntas rápidas sobre o que você busca, como gosta de conversar e quando pode ser atendido.
+              Não é um diagnóstico — é só para entender suas preferências.
+            </p>
+            <div>
+              <Link to="/triagem" className="btn btn--filled btn--lg">
+                Começar questionário
+                <Icon name="arrow-right" size={18} />
+              </Link>
+            </div>
+          </div>
+          <Mascot size={132} className="hero__art" />
+        </section>
+      ) : (
+        <section className="section">
+          <div className="section__header">
+            <h2 className="t-title-2">Recomendados</h2>
+            <div className="search section__search">
+              <Icon name="search" size={18} className="search__icon" />
               <input
-                type="text"
-                className="input"
-                style={{ width: '100%', paddingLeft: '28px' }}
-                placeholder="Nome ou especialidade..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search__input"
+                type="search"
+                placeholder="Buscar por nome ou especialidade"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                aria-label="Buscar profissionais"
               />
-              <div style={{ position: 'absolute', left: '8px', top: '7px', color: 'var(--text-muted)' }}>
-                <Icon name="search" size={14} />
-              </div>
             </div>
           </div>
 
           {loading ? (
-            <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Buscando melhores combinações...</p>
-          ) : filteredMatches.length === 0 ? (
-            <div className="card" style={{ textAlign: 'center', padding: '32px' }}>
-              <Icon name="brain" size={36} color="var(--text-muted)" />
-              <p style={{ marginTop: '8px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                Nenhum psicólogo encontrado para os filtros selecionados.
-              </p>
+            <div className="grid-cards">
+              <MatchSkeleton />
+              <MatchSkeleton />
+              <MatchSkeleton />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="card card--lg">
+              <EmptyState
+                title={query ? 'Nenhum resultado' : 'Ainda sem recomendações'}
+                text={
+                  query
+                    ? `Não encontramos profissionais para “${query}”.`
+                    : 'Ainda não há profissionais compatíveis com o seu perfil. Tente revisar suas respostas.'
+                }
+                action={
+                  !query && (
+                    <Link to="/triagem" className="btn btn--tinted">
+                      Revisar questionário
+                    </Link>
+                  )
+                }
+              />
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
-              {filteredMatches.map((psi) => (
-                <div key={psi.idPsicologo} className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-                      <div>
-                        <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>{psi.nome}</h3>
-                        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{psi.crp}</span>
-                      </div>
-
-                      <div
-                        style={{
-                          backgroundColor: psi.matchPercentage >= 70 ? '#E8F5E9' : '#FEF3C7',
-                          color: psi.matchPercentage >= 70 ? 'var(--brand-primary)' : '#D97706',
-                          padding: '4px 8px',
-                          borderRadius: '12px',
-                          fontWeight: '700',
-                          fontSize: '12px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                        }}
-                      >
-                        <Icon name="star" size={12} />
-                        {psi.matchPercentage}% Match
-                      </div>
-                    </div>
-
-                    <div style={{ marginBottom: '12px' }}>
-                      <span className="badge badge-info">{psi.especialidade}</span>
-                    </div>
-
-                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '12px', lineHeight: '1.4' }}>
-                      {psi.biografia || 'Psicólogo especializado no atendimento clínico de adultos e jovens.'}
-                    </p>
-                  </div>
-
-                  <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div>
-                      <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>Valor por Sessão</span>
-                      <strong style={{ fontSize: '14px', color: 'var(--brand-primary)' }}>
-                        R$ {Number(psi.valorSessao || 150).toFixed(2)}
-                      </strong>
-                    </div>
-
-                    <button
-                      onClick={() => handleOpenBookingModal(psi)}
-                      className="btn btn-primary"
-                    >
-                      <Icon name="calendar" size={14} />
-                      Agendar
-                    </button>
-                  </div>
-                </div>
+            <div className="grid-cards">
+              {filtered.map((m, i) => (
+                <MatchCard
+                  key={m.idPsicologo}
+                  match={m}
+                  index={i}
+                  onBook={() =>
+                    setSelected({
+                      id: m.idPsicologo,
+                      name: m.nome,
+                      crp: m.crp,
+                      specialty: m.especialidade,
+                      biography: m.biografia,
+                      sessionFee: m.valorSessao,
+                    })
+                  }
+                />
               ))}
             </div>
           )}
 
-          {/* Modal de Agendamento */}
-          {selectedPsi && (
-            <div className="modal-overlay">
-              <div className="modal-content">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: '700' }}>Agendar Sessão de Terapia</h3>
-                  <button onClick={() => setSelectedPsi(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}>×</button>
-                </div>
+          <p className="t-footnote t-secondary row gap-2">
+            <Icon name="info" size={14} />
+            A compatibilidade é uma estimativa baseada nas suas respostas, não uma indicação clínica.
+          </p>
+        </section>
+      )}
 
-                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                  Profissional: <strong>{selectedPsi.nome}</strong> ({selectedPsi.especialidade})
-                </p>
-
-                <div className="form-field">
-                  <label className="form-field__label">Escolha a Data e Hora <span className="form-field__required">*</span></label>
-                  <input
-                    type="datetime-local"
-                    className="input"
-                    value={appointmentDate}
-                    onChange={(e) => setAppointmentDate(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '20px' }}>
-                  <button onClick={() => setSelectedPsi(null)} className="btn btn-secondary">Cancelar</button>
-                  <button onClick={handleConfirmBooking} className="btn btn-primary" disabled={bookingLoading}>
-                    {bookingLoading ? 'Confirmando...' : 'Confirmar Agendamento'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </main>
-      </div>
-    </div>
+      <BookingSheet key={selected?.id ?? 'none'} psychologist={selected} onClose={() => setSelected(null)} />
+    </>
   );
 };

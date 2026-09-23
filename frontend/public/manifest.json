@@ -1,15 +1,12 @@
 {
   "short_name": "HopeMind",
-  "name": "HopeMind - Plataforma de Saúde Mental & Triagem Inteligente",
+  "name": "HopeMind — Terapia que combina com você",
   "icons": [
-    {
-      "src": "/images/logo-hopemind-full.png",
-      "type": "image/png",
-      "sizes": "192x192 512x512"
-    }
+    { "src": "/images/icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any maskable" },
+    { "src": "/images/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any maskable" }
   ],
   "start_url": "/",
-  "background_color": "#F8FAFC",
-  "theme_color": "#2E7D32",
+  "background_color": "#FBF7EF",
+  "theme_color": "#F5F5F7",
   "display": "standalone"
 }
