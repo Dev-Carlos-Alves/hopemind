@@ -1,0 +1,26 @@
+# Smoke test pós-deploy (Plano e Projeto de Teste, 3.1 — ambiente PRD): confirma que a API
+# publicada no Render responde. Roda depois de cada push na main (o Render faz o deploy
+# automaticamente) e pode ser disparado à mão. A primeira tentativa pode demorar: o plano
+# gratuito do Render hiberna a API e leva até ~1 minuto para acordar.
+name: Smoke test (produção)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Aguardar o deploy no Render
+        if: github.event_name == 'push'
+        run: sleep 240
+      - name: GET /api/health
+        run: |
+          for i in $(seq 1 10); do
+            body=$(curl -fsS --max-time 60 https://hopemind-api.onrender.com/api/health) && echo "$body" | grep -q '"ok"' && { echo "API no ar: $body"; exit 0; }
+            echo "Tentativa $i falhou; aguardando 20 s..."; sleep 20
+          done
+          echo "A API não respondeu ao health check." >&2
+          exit 1

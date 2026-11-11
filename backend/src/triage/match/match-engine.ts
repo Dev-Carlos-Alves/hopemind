@@ -333,7 +333,9 @@ export function findMatches(patient: PatientProfile, psychologists: Psychologist
     results.push({
       psychologistId: psy.id,
       score: round(score),
-      band: band(score),
+      // The band comes from the same (rounded) score that is returned and stored in match_runs,
+      // so a score of 0.55 can never be labelled "possível".
+      band: band(round(score)),
       components: Object.fromEntries(Object.entries(parts.components).map(([k, v]) => [k, round(v)])) as Record<Component, number>,
       distanceKm: parts.distanceKm,
       reasons,

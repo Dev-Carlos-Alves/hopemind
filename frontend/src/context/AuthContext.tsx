@@ -11,12 +11,15 @@ export interface User {
   hasTriage?: boolean;
 }
 
+/** Body of POST /api/auth/register (validated by the API DTO). */
+export type RegisterPayload = Record<string, string | number | undefined>;
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
   login: (email: string, pass: string) => Promise<User>;
-  registerUser: (data: any) => Promise<any>;
+  registerUser: (data: RegisterPayload) => Promise<{ message: string; userId: number }>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -58,7 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return u;
   };
 
-  const registerUser = async (data: any) => {
+  const registerUser = async (data: RegisterPayload) => {
     const res = await api.post('/auth/register', data);
     return res.data;
   };

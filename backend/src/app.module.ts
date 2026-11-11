@@ -13,7 +13,9 @@ import { GeoModule } from './geo/geo.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    // 100 req/min per IP. THROTTLE_LIMIT exists only so the k6 load test (single source IP)
+    // can run against the homologation environment; production keeps the default.
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: Number(process.env.THROTTLE_LIMIT) || 100 }]),
     PrismaModule,
     GeoModule,
     AuthModule,
