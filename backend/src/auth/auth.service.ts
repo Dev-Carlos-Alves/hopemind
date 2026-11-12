@@ -25,6 +25,8 @@ export interface JwtPayload {
   userType: UserType;
   patientId: number | null;
   psychologistId: number | null;
+  /** "Manter conectado": refresh token de 30 dias em vez de 7. */
+  remember?: boolean;
 }
 
 @Injectable()
@@ -105,7 +107,7 @@ export class AuthService {
     return { message: 'Cadastro realizado com sucesso!', userId: user.id };
   }
 
-  async login(email: string, password: string) {
+  async login(email: string, password: string, remember = false) {
     const user = await this.prisma.user.findUnique({
       where: { email: email.toLowerCase() },
       include: { patient: true, psychologist: true },
@@ -123,6 +125,7 @@ export class AuthService {
       userType: user.userType,
       patientId: user.patient?.id ?? null,
       psychologistId: user.psychologist?.id ?? null,
+      remember,
     };
 
     return {
@@ -131,7 +134,8 @@ export class AuthService {
     };
   }
 
-  async refresh(refreshToken: string | undefined) {
+  /** Renova a sessão; `remember` troca a escolha de "manter conectado" (omitido = mantém a do token). */
+  async refresh(refreshToken: string | undefined, remember?: boolean) {
     if (!refreshToken) {
       throw new UnauthorizedException('Sessão expirada.');
     }
@@ -158,6 +162,7 @@ export class AuthService {
       userType: user.userType,
       patientId: user.patient?.id ?? null,
       psychologistId: user.psychologist?.id ?? null,
+      remember: remember ?? payload.remember ?? false,
     });
   }
 
@@ -197,8 +202,8 @@ export class AuthService {
 
   private async issueTokens(payload: JwtPayload) {
     const accessToken = await this.jwtService.signAsync(payload, { secret: accessSecret(), expiresIn: '15m' });
-    const refreshToken = await this.jwtService.signAsync(payload, { secret: refreshSecret(), expiresIn: '7d' });
-    return { accessToken, refreshToken };
+    const refreshToken = await this.jwtService.signAsync(payload, { secret: refreshSecret(), expiresIn: payload.remember ? '30d' : '7d' });
+    return { accessToken, refreshToken, remember: !!payload.remember };
   }
 
   private publicUser(p: JwtPayload) {
