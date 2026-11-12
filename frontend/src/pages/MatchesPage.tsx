@@ -32,6 +32,8 @@ interface MatchItem {
     approaches: string[];
     biography: string | null;
     sessionFee: string | number;
+    /** Link de contato informado pelo psicólogo (WhatsApp, site, agenda). */
+    contactLink?: string | null;
     modalities: string[];
     neighborhood: string | null;
     city: string | null;
@@ -152,9 +154,23 @@ const MatchCard: React.FC<{ match: MatchItem; rank: number; index: number; onBoo
           <p className="t-headline">{currency.format(Number(p.sessionFee || 0))}</p>
           <p className="t-caption t-secondary">por sessão</p>
         </div>
-        <Button variant="tinted" icon="calendar" onClick={onBook}>
-          Ver horários
-        </Button>
+        <div className="row gap-2">
+          {p.contactLink && (
+            <a
+              className="btn btn--gray btn--icon"
+              href={p.contactLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Falar com ${p.name}`}
+              title="Contato do profissional"
+            >
+              <Icon name="message" size={18} />
+            </a>
+          )}
+          <Button variant="tinted" icon="calendar" onClick={onBook}>
+            Ver horários
+          </Button>
+        </div>
       </div>
     </article>
   );

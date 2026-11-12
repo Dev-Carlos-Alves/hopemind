@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AddressCard } from '../components/AddressCard';
+import { ProfessionalProfile, ProfessionalProfileSheet } from '../components/ProfessionalProfileSheet';
 import { Icon, IconName } from '../components/Icon';
 import { Avatar, PageHeader, Segmented, Skeleton } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
@@ -15,12 +16,7 @@ interface Profile {
   birthDate: string;
   gender: string;
   userType: 'PATIENT' | 'PSYCHOLOGIST' | 'ADMIN';
-  psychologist: {
-    crp: string;
-    specialty: string;
-    therapeuticApproach: string;
-    sessionFee: string | number;
-  } | null;
+  psychologist: ProfessionalProfile | null;
 }
 
 const Row: React.FC<{ icon: IconName; color: string; label: string; value?: React.ReactNode }> = ({ icon, color, label, value }) => (
@@ -39,6 +35,7 @@ export const SettingsPage: React.FC = () => {
   const { user, logout } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [theme, setTheme] = useState<ThemePreference>(getThemePreference);
+  const [editingProfile, setEditingProfile] = useState(false);
 
   useEffect(() => {
     api.get<Profile>('/auth/me').then((res) => setProfile(res.data)).catch(() => undefined);
@@ -108,10 +105,27 @@ export const SettingsPage: React.FC = () => {
             <div className="group__body">
               <Row icon="badge" color="#9a7428" label="CRP" value={profile.psychologist.crp} />
               <Row icon="brain" color="#3a7733" label="Especialidade" value={profile.psychologist.specialty} />
+              <Row icon="leaf" color="#2f7a64" label="Abordagem" value={profile.psychologist.therapeuticApproach} />
               <Row icon="credit-card" color="#c47a2c" label="Valor da sessão" value={currency.format(Number(profile.psychologist.sessionFee))} />
+              <Row icon="message" color="#4a64b0" label="Link de contato" value={profile.psychologist.contactLink || undefined} />
+              <button type="button" className="list-row list-row--button" style={{ '--row-inset': '58px' } as React.CSSProperties} onClick={() => setEditingProfile(true)}>
+                <span className="list-row__icon" style={{ background: '#636366' }}>
+                  <Icon name="sliders" size={17} strokeWidth={2} />
+                </span>
+                <span className="list-row__label t-tint">Editar perfil profissional</span>
+                <Icon name="chevron-right" size={18} className="list-row__chevron" />
+              </button>
             </div>
+            <p className="group__footer">Os pacientes veem especialidade, abordagem, biografia, valor e link de contato nas recomendações.</p>
           </section>
         )}
+
+        <ProfessionalProfileSheet
+          open={editingProfile}
+          profile={profile?.psychologist ?? null}
+          onClose={() => setEditingProfile(false)}
+          onSaved={(saved) => setProfile((p) => (p ? { ...p, psychologist: { ...p.psychologist!, ...saved } } : p))}
+        />
 
         <section className="group">
           <h3 className="group__header">Aparência</h3>

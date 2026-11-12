@@ -157,6 +157,7 @@ export class TriageService {
             approaches: ((psyAnswers.S05 as string[]) ?? []).map((a) => labelOf(APPROACHES, a)),
             biography: p.biography,
             sessionFee: p.sessionFee,
+            contactLink: p.contactLink,
             modalities: (psyAnswers.S14 as string[]) ?? [],
             neighborhood: p.user.neighborhood,
             city: p.user.city,
