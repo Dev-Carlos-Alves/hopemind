@@ -5,7 +5,15 @@ import { Request, Response } from 'express';
 import { ACCESS_COOKIE, ACCESS_TTL_MS, REFRESH_COOKIE, cookieOptions, refreshTtlMs } from './auth.config';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
-import { LoginDto, RefreshDto, RegisterDto, UpdateAddressDto, UpdateProfessionalProfileDto } from './dto/auth.dto';
+import {
+  ForgotPasswordDto,
+  LoginDto,
+  RefreshDto,
+  RegisterDto,
+  ResetPasswordDto,
+  UpdateAddressDto,
+  UpdateProfessionalProfileDto,
+} from './dto/auth.dto';
 
 const AUTH_THROTTLE = { default: { limit: 5, ttl: 60_000 } };
 
@@ -28,9 +36,27 @@ export class AuthController {
   @HttpCode(200)
   @ApiOperation({ summary: 'Autenticar usuário e definir cookies httpOnly' })
   async login(@Body() body: LoginDto, @Res({ passthrough: true }) response: Response) {
-    const { accessToken, refreshToken, remember, user } = await this.authService.login(body.email, body.password, body.remember);
+    const { accessToken, refreshToken, remember, user } = await this.authService.login(body.login ?? body.email!, body.password, body.remember);
     this.setSessionCookies(response, accessToken, refreshToken, remember);
     return { message: 'Login realizado com sucesso!', user, remember };
+  }
+
+  @Public()
+  @Throttle(AUTH_THROTTLE)
+  @Post('forgot-password')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Envia um código de 6 dígitos para o e-mail da conta (login por e-mail ou CPF)' })
+  forgotPassword(@Body() body: ForgotPasswordDto) {
+    return this.authService.requestPasswordReset(body.login);
+  }
+
+  @Public()
+  @Throttle(AUTH_THROTTLE)
+  @Post('reset-password')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Redefine a senha com o código recebido por e-mail' })
+  resetPassword(@Body() body: ResetPasswordDto) {
+    return this.authService.resetPassword(body.login, body.code, body.password);
   }
 
   @Public()

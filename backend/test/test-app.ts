@@ -6,6 +6,7 @@ import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/app.setup';
 import { CepAddress, CepService } from '../src/geo/cep.service';
+import { MailService, OutgoingMail } from '../src/mail/mail.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { Location } from '../src/triage/match/match-engine';
 import { PATIENT_QUESTIONNAIRE, PSYCHOLOGIST_QUESTIONNAIRE } from '../src/triage/questionnaire';
@@ -30,9 +31,20 @@ export class FakeCepService {
   }
 }
 
+/** Keeps the e-mails the API would send, so tests can read the reset code. */
+export class FakeMailService {
+  sent: OutgoingMail[] = [];
+  configured = true;
+  async send(mail: OutgoingMail) {
+    this.sent.push(mail);
+    return true;
+  }
+}
+
 export interface TestApp {
   app: INestApplication;
   prisma: FakePrisma;
+  mail: FakeMailService;
   http: () => request.SuperTest<request.Test>;
   /** Clears the database and the rate-limit counters. */
   reset: () => void;
@@ -41,7 +53,10 @@ export interface TestApp {
 
 export async function createTestApp(): Promise<TestApp> {
   const prisma = new FakePrisma();
+  const mail = new FakeMailService();
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+    .overrideProvider(MailService)
+    .useValue(mail)
     .overrideProvider(PrismaService)
     .useValue(prisma)
     .overrideProvider(CepService)
@@ -55,10 +70,11 @@ export async function createTestApp(): Promise<TestApp> {
   const storage = app.get(ThrottlerStorage) as unknown as { storage: Record<string, unknown> };
   const reset = () => {
     prisma.reset();
+    mail.sent = [];
     for (const k of Object.keys(storage.storage)) delete storage.storage[k];
   };
 
-  return { app, prisma, http: () => request(app.getHttpServer()), reset, close: () => app.close() };
+  return { app, prisma, mail, http: () => request(app.getHttpServer()), reset, close: () => app.close() };
 }
 
 /* ───── seeding (direct inserts, like the Prisma seed script) ───── */

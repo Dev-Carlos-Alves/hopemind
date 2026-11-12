@@ -73,6 +73,7 @@ model User {
   psychologist      Psychologist?
   auditLogs         AuditLog[]
   triageSubmissions TriageSubmission[]
+  passwordResets    PasswordReset[]
 
   @@map("users")
 }
@@ -188,4 +189,21 @@ model AuditLog {
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("audit_logs")
+}
+
+// "Esqueci minha senha": código de 6 dígitos enviado por e-mail. Guardamos só o hash; o código
+// vale 15 minutos, serve uma única vez e aceita até 5 tentativas.
+model PasswordReset {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  codeHash  String    @map("code_hash") @db.VarChar(255)
+  expiresAt DateTime  @map("expires_at")
+  attempts  Int       @default(0)
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_resets")
 }

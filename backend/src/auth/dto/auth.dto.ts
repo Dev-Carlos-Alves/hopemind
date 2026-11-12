@@ -36,12 +36,50 @@ export class LoginDto {
   @IsBoolean({ message: 'Informe true ou false em "remember".' })
   remember?: boolean;
 
+  /** E-mail ou CPF (com ou sem máscara). */
+  @ValidateIf((o) => o.email === undefined)
   @Transform(trim)
-  @IsEmail({}, { message: 'Informe um e-mail válido.' })
-  email: string;
+  @MaxLength(255)
+  @IsNotEmpty({ message: 'Informe o e-mail ou CPF.' })
+  @IsString({ message: 'Informe o e-mail ou CPF.' })
+  login?: string;
+
+  /** Campo antigo, mantido para clientes que ainda enviam "email"; também aceita CPF. */
+  @ValidateIf((o) => o.login === undefined)
+  @Transform(trim)
+  @MaxLength(255)
+  @IsNotEmpty({ message: 'Informe o e-mail ou CPF.' })
+  @IsString({ message: 'Informe o e-mail ou CPF.' })
+  email?: string;
 
   @IsString()
   @IsNotEmpty({ message: 'Informe a senha.' })
+  password: string;
+}
+
+/** "Esqueci minha senha": pede o código de 6 dígitos para o e-mail da conta. */
+export class ForgotPasswordDto {
+  @Transform(trim)
+  @MaxLength(255)
+  @IsNotEmpty({ message: 'Informe o e-mail ou CPF.' })
+  @IsString({ message: 'Informe o e-mail ou CPF.' })
+  login: string;
+}
+
+export class ResetPasswordDto {
+  @Transform(trim)
+  @MaxLength(255)
+  @IsNotEmpty({ message: 'Informe o e-mail ou CPF.' })
+  @IsString({ message: 'Informe o e-mail ou CPF.' })
+  login: string;
+
+  @Transform(({ value }) => (typeof value === 'string' ? value.replace(/\D/g, '') : value))
+  @Matches(/^\d{6}$/, { message: 'O código tem 6 dígitos.' })
+  code: string;
+
+  @MaxLength(128, { message: 'Senha muito longa.' })
+  @MinLength(8, { message: 'A senha precisa ter pelo menos 8 caracteres.' })
+  @IsString({ message: 'Informe a nova senha.' })
   password: string;
 }
 

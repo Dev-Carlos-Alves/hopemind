@@ -9,6 +9,7 @@ import { TriageModule } from './triage/triage.module';
 import { AppController, HealthController } from './app.controller';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { GeoModule } from './geo/geo.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { GeoModule } from './geo/geo.module';
     // can run against the homologation environment; production keeps the default.
     ThrottlerModule.forRoot([{ ttl: 60000, limit: Number(process.env.THROTTLE_LIMIT) || 100 }]),
     PrismaModule,
+    MailModule,
     GeoModule,
     AuthModule,
     TriageModule,

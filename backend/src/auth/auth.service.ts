@@ -2,7 +2,9 @@ import { BadRequestException, ForbiddenException, Injectable, UnauthorizedExcept
 import { JwtService } from '@nestjs/jwt';
 import { UserType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { randomInt } from 'crypto';
 import { CepService } from '../geo/cep.service';
+import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { accessSecret, refreshSecret } from './auth.config';
 import { RegisterDto, UpdateAddressDto, UpdateProfessionalProfileDto } from './dto/auth.dto';
@@ -35,7 +37,59 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private cepService: CepService,
+    private mail: MailService,
   ) {}
+
+  /* ───────────── Esqueci minha senha ───────────── */
+
+  static readonly RESET_TTL_MS = 15 * 60 * 1000;
+  static readonly RESET_MAX_ATTEMPTS = 5;
+  /** Same answer whether or not the account exists, so the endpoint can't be used to find accounts. */
+  static readonly RESET_REQUESTED = 'Se houver uma conta com esses dados, enviamos um código de 6 dígitos para o e-mail cadastrado. Ele vale por 15 minutos.';
+
+  async requestPasswordReset(login: string) {
+    const user = await this.findByLogin(login);
+    if (user && user.isActive) {
+      const code = String(randomInt(0, 1_000_000)).padStart(6, '0');
+      // A new code replaces any previous one still waiting to be used.
+      await this.prisma.passwordReset.updateMany({ where: { userId: user.id, usedAt: null }, data: { usedAt: new Date() } });
+      await this.prisma.passwordReset.create({
+        data: { userId: user.id, codeHash: await bcrypt.hash(code, 10), expiresAt: new Date(Date.now() + AuthService.RESET_TTL_MS) },
+      });
+      await this.mail.send({
+        to: user.email,
+        subject: 'HopeMind — código para redefinir sua senha',
+        text:
+          `Olá, ${user.name.split(' ')[0]}!\n\nSeu código para redefinir a senha do HopeMind é ${code}.\n` +
+          'Ele vale por 15 minutos e só pode ser usado uma vez.\n\n' +
+          'Se não foi você quem pediu, ignore este e-mail: sua senha continua a mesma.',
+      });
+    }
+    return { message: AuthService.RESET_REQUESTED };
+  }
+
+  async resetPassword(login: string, code: string, password: string) {
+    const invalid = new BadRequestException('Código inválido ou expirado. Peça um novo código.');
+    const user = await this.findByLogin(login);
+    if (!user || !user.isActive) throw invalid;
+
+    const reset = await this.prisma.passwordReset.findFirst({
+      where: { userId: user.id, usedAt: null },
+      orderBy: { createdAt: 'desc' },
+    });
+    if (!reset || reset.expiresAt < new Date() || reset.attempts >= AuthService.RESET_MAX_ATTEMPTS) throw invalid;
+
+    if (!(await bcrypt.compare(code, reset.codeHash))) {
+      await this.prisma.passwordReset.update({ where: { id: reset.id }, data: { attempts: reset.attempts + 1 } });
+      throw invalid;
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({ where: { id: user.id }, data: { passwordHash: await bcrypt.hash(password, 10) } });
+      await tx.passwordReset.update({ where: { id: reset.id }, data: { usedAt: new Date() } });
+    });
+    return { message: 'Senha redefinida. Entre com a nova senha.' };
+  }
 
   /** Coordinates are always resolved on the server; the client only sends the CEP. */
   private async resolveAddress(cep: string, addressNumber?: string) {
@@ -129,15 +183,21 @@ export class AuthService {
     return { message: 'Cadastro realizado com sucesso!', userId: user.id };
   }
 
-  async login(email: string, password: string, remember = false) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
-      include: { patient: true, psychologist: true },
-    });
+  /** Finds the account by e-mail or CPF (any mask). Returns null for anything else. */
+  private findByLogin(login: string) {
+    const value = (login ?? '').trim();
+    const digits = value.replace(/\D/g, '');
+    const where = value.includes('@') ? { email: value.toLowerCase() } : digits.length === 11 ? { cpf: digits } : null;
+    if (!where) return null;
+    return this.prisma.user.findUnique({ where, include: { patient: true, psychologist: true } });
+  }
+
+  async login(login: string, password: string, remember = false) {
+    const user = await this.findByLogin(login);
 
     const valid = user && user.isActive && (await bcrypt.compare(password, user.passwordHash));
     if (!valid) {
-      throw new UnauthorizedException('E-mail ou senha incorretos.');
+      throw new UnauthorizedException('E-mail, CPF ou senha incorretos.');
     }
 
     const payload: JwtPayload = {
