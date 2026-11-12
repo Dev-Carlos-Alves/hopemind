@@ -13,6 +13,10 @@ export const REFRESH_COOKIE = 'refresh_token';
 
 export const ACCESS_TTL_MS = 15 * 60 * 1000;
 export const REFRESH_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+/** "Manter conectado": the refresh token lives 30 days and is renewed on every use. */
+export const REMEMBER_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+export const refreshTtlMs = (remember?: boolean) => (remember ? REMEMBER_TTL_MS : REFRESH_TTL_MS);
 
 export const accessSecret = () => requireEnv('JWT_ACCESS_SECRET');
 export const refreshSecret = () => requireEnv('JWT_REFRESH_SECRET');

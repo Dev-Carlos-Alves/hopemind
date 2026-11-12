@@ -1,5 +1,6 @@
 import { Transform } from 'class-transformer';
 import {
+  IsBoolean,
   IsDateString,
   IsEmail,
   IsIn,
@@ -21,7 +22,19 @@ const onlyDigits = ({ value }: { value: unknown }) => {
   return digits === '' ? undefined : digits;
 };
 
+export class RefreshDto {
+  /** true = "manter conectado" (sessão de 30 dias); false = sessão comum (7 dias). Omitido = mantém a escolha atual. */
+  @IsOptional()
+  @IsBoolean({ message: 'Informe true ou false em "remember".' })
+  remember?: boolean;
+}
+
 export class LoginDto {
+  /** Permite escolher "manter conectado" já no login (o app também pode escolher depois, em /auth/refresh). */
+  @IsOptional()
+  @IsBoolean({ message: 'Informe true ou false em "remember".' })
+  remember?: boolean;
+
   @Transform(trim)
   @IsEmail({}, { message: 'Informe um e-mail válido.' })
   email: string;

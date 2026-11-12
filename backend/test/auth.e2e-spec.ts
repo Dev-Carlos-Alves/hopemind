@@ -186,6 +186,54 @@ describe('API — autenticação, segurança e escopo (integração HTTP)', () =
     });
   });
 
+  describe('manter conectado (app Android)', () => {
+    const SEVEN_DAYS = 7 * 24 * 60 * 60;
+    const THIRTY_DAYS = 30 * 24 * 60 * 60;
+    const refreshMaxAge = (res: { headers: Record<string, unknown> }) =>
+      Number(/Max-Age=(\d+)/.exec(cookiesOf(res as never).find((c) => c.startsWith('refresh_token='))!)![1]);
+
+    it('sem a escolha, a sessão salva vale 7 dias', async () => {
+      seedPatient(t.prisma, { email: 'ana@teste.dev' });
+      const res = await t.http().post('/api/auth/login').send({ email: 'ana@teste.dev', password: PASSWORD }).expect(200);
+      expect(res.body.remember).toBe(false);
+      expect(refreshMaxAge(res)).toBe(SEVEN_DAYS);
+    });
+
+    it('ao escolher "manter conectado" depois do login, a sessão passa a valer 30 dias e continua assim nas renovações', async () => {
+      seedPatient(t.prisma, { email: 'ana@teste.dev' });
+      const agent = await loginAs(t, 'ana@teste.dev');
+      const on = await agent.post('/api/auth/refresh').send({ remember: true }).expect(200);
+      expect(on.body.remember).toBe(true);
+      expect(refreshMaxAge(on)).toBe(THIRTY_DAYS);
+      // Renovação automática (o app manda o corpo vazio): a escolha é preservada.
+      const again = await agent.post('/api/auth/refresh').expect(200);
+      expect(again.body.remember).toBe(true);
+      expect(refreshMaxAge(again)).toBe(THIRTY_DAYS);
+      await agent.get('/api/auth/me').expect(200);
+    });
+
+    it('também pode ser escolhido no próprio login e desligado depois', async () => {
+      seedPatient(t.prisma, { email: 'ana@teste.dev' });
+      const agent = (await import('supertest')).agent(t.app.getHttpServer());
+      const res = await agent.post('/api/auth/login').send({ email: 'ana@teste.dev', password: PASSWORD, remember: true }).expect(200);
+      expect(refreshMaxAge(res)).toBe(THIRTY_DAYS);
+      const off = await agent.post('/api/auth/refresh').send({ remember: false }).expect(200);
+      expect(off.body.remember).toBe(false);
+      expect(refreshMaxAge(off)).toBe(SEVEN_DAYS);
+    });
+
+    it('rejeita valores que não são booleanos', async () => {
+      seedPatient(t.prisma, { email: 'ana@teste.dev' });
+      const agent = await loginAs(t, 'ana@teste.dev');
+      await agent.post('/api/auth/refresh').send({ remember: 'sim' }).expect(400);
+      await t.http().post('/api/auth/login').send({ email: 'ana@teste.dev', password: PASSWORD, remember: 1 }).expect(400);
+    });
+
+    it('sem refresh token não há o que manter (401)', async () => {
+      await t.http().post('/api/auth/refresh').send({ remember: true }).expect(401);
+    });
+  });
+
   describe('endereço e CEP (US-14 / RF-008)', () => {
     it('GET /api/geo/cep/:cep é público e devolve endereço com coordenadas', async () => {
       const res = await t.http().get('/api/geo/cep/52050000').expect(200);

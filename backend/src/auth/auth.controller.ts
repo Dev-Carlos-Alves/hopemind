@@ -2,10 +2,10 @@ import { Body, Controller, Get, HttpCode, Patch, Post, Req, Res } from '@nestjs/
 import { Throttle } from '@nestjs/throttler';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
-import { ACCESS_COOKIE, ACCESS_TTL_MS, REFRESH_COOKIE, REFRESH_TTL_MS, cookieOptions } from './auth.config';
+import { ACCESS_COOKIE, ACCESS_TTL_MS, REFRESH_COOKIE, cookieOptions, refreshTtlMs } from './auth.config';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
-import { LoginDto, RegisterDto, UpdateAddressDto } from './dto/auth.dto';
+import { LoginDto, RefreshDto, RegisterDto, UpdateAddressDto } from './dto/auth.dto';
 
 const AUTH_THROTTLE = { default: { limit: 5, ttl: 60_000 } };
 
@@ -28,19 +28,19 @@ export class AuthController {
   @HttpCode(200)
   @ApiOperation({ summary: 'Autenticar usuário e definir cookies httpOnly' })
   async login(@Body() body: LoginDto, @Res({ passthrough: true }) response: Response) {
-    const { accessToken, refreshToken, user } = await this.authService.login(body.email, body.password);
-    this.setSessionCookies(response, accessToken, refreshToken);
-    return { message: 'Login realizado com sucesso!', user };
+    const { accessToken, refreshToken, remember, user } = await this.authService.login(body.email, body.password, body.remember);
+    this.setSessionCookies(response, accessToken, refreshToken, remember);
+    return { message: 'Login realizado com sucesso!', user, remember };
   }
 
   @Public()
   @Post('refresh')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Renovar o access token a partir do refresh token (cookie)' })
-  async refresh(@Req() req: Request, @Res({ passthrough: true }) response: Response) {
-    const { accessToken, refreshToken } = await this.authService.refresh(req.cookies?.[REFRESH_COOKIE]);
-    this.setSessionCookies(response, accessToken, refreshToken);
-    return { message: 'Sessão renovada.' };
+  @ApiOperation({ summary: 'Renovar o access token a partir do refresh token (cookie); { remember } liga/desliga "manter conectado"' })
+  async refresh(@Req() req: Request, @Body() body: RefreshDto, @Res({ passthrough: true }) response: Response) {
+    const { accessToken, refreshToken, remember } = await this.authService.refresh(req.cookies?.[REFRESH_COOKIE], body?.remember);
+    this.setSessionCookies(response, accessToken, refreshToken, remember);
+    return { message: 'Sessão renovada.', remember };
   }
 
   @Public()
@@ -66,8 +66,8 @@ export class AuthController {
     return this.authService.updateAddress(req.user.sub, body);
   }
 
-  private setSessionCookies(response: Response, accessToken: string, refreshToken: string) {
+  private setSessionCookies(response: Response, accessToken: string, refreshToken: string, remember: boolean) {
     response.cookie(ACCESS_COOKIE, accessToken, cookieOptions(ACCESS_TTL_MS));
-    response.cookie(REFRESH_COOKIE, refreshToken, cookieOptions(REFRESH_TTL_MS));
+    response.cookie(REFRESH_COOKIE, refreshToken, cookieOptions(refreshTtlMs(remember)));
   }
 }
