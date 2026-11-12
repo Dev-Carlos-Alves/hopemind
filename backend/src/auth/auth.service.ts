@@ -1,11 +1,11 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { CepService } from '../geo/cep.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { accessSecret, refreshSecret } from './auth.config';
-import { RegisterDto, UpdateAddressDto } from './dto/auth.dto';
+import { RegisterDto, UpdateAddressDto, UpdateProfessionalProfileDto } from './dto/auth.dto';
 
 const ADDRESS_FIELDS = {
   cep: true,
@@ -55,6 +55,28 @@ export class AuthService {
   async updateAddress(userId: number, data: UpdateAddressDto) {
     const address = await this.resolveAddress(data.cep, data.addressNumber);
     return this.prisma.user.update({ where: { id: userId }, data: address, select: ADDRESS_FIELDS });
+  }
+
+  /** US-11: atualiza o perfil profissional do psicólogo logado (o ID vem do token, nunca do cliente). */
+  async updateProfessionalProfile(psychologistId: number | null, data: UpdateProfessionalProfileDto) {
+    if (!psychologistId) {
+      throw new ForbiddenException('Somente psicólogos têm perfil profissional.');
+    }
+    const changes = {
+      ...(data.specialty !== undefined && { specialty: data.specialty }),
+      ...(data.therapeuticApproach !== undefined && { therapeuticApproach: data.therapeuticApproach }),
+      ...(data.biography !== undefined && { biography: data.biography || null }),
+      ...(data.sessionFee !== undefined && { sessionFee: data.sessionFee }),
+      ...(data.contactLink !== undefined && { contactLink: data.contactLink || null }),
+    };
+    if (Object.keys(changes).length === 0) {
+      throw new BadRequestException('Envie ao menos um campo para atualizar.');
+    }
+    return this.prisma.psychologist.update({
+      where: { id: psychologistId },
+      data: changes,
+      select: { id: true, crp: true, specialty: true, therapeuticApproach: true, biography: true, sessionFee: true, contactLink: true },
+    });
   }
 
   async register(data: RegisterDto) {

@@ -5,7 +5,7 @@ import { Request, Response } from 'express';
 import { ACCESS_COOKIE, ACCESS_TTL_MS, REFRESH_COOKIE, cookieOptions, refreshTtlMs } from './auth.config';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
-import { LoginDto, RefreshDto, RegisterDto, UpdateAddressDto } from './dto/auth.dto';
+import { LoginDto, RefreshDto, RegisterDto, UpdateAddressDto, UpdateProfessionalProfileDto } from './dto/auth.dto';
 
 const AUTH_THROTTLE = { default: { limit: 5, ttl: 60_000 } };
 
@@ -57,6 +57,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Retorna os dados do usuário autenticado' })
   getProfile(@Req() req: any) {
     return this.authService.getProfile(req.user.sub);
+  }
+
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @Patch('me/profile')
+  @ApiOperation({ summary: 'Psicólogo atualiza especialidade, abordagem, biografia, valor da sessão e link de contato (US-11)' })
+  updateProfessionalProfile(@Req() req: any, @Body() body: UpdateProfessionalProfileDto) {
+    return this.authService.updateProfessionalProfile(req.user.psychologistId, body);
   }
 
   @Throttle({ default: { limit: 10, ttl: 60_000 } })

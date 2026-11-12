@@ -9,6 +9,7 @@ import {
   IsOptional,
   IsString,
   Matches,
+  Max,
   MaxLength,
   Min,
   MinLength,
@@ -128,6 +129,45 @@ export class RegisterDto {
   @IsString()
   @MaxLength(20, { message: 'Número muito longo.' })
   addressNumber?: string;
+}
+
+/** US-11: o psicólogo atualiza o perfil exibido nas recomendações. Campos omitidos não mudam. */
+export class UpdateProfessionalProfileDto {
+  @IsOptional()
+  @Transform(trim)
+  @MaxLength(255, { message: 'Especialidade muito longa.' })
+  @MinLength(3, { message: 'Informe a especialidade principal.' })
+  @IsString({ message: 'Informe a especialidade principal.' })
+  specialty?: string;
+
+  @IsOptional()
+  @Transform(trim)
+  @MaxLength(255, { message: 'Abordagem muito longa.' })
+  @MinLength(2, { message: 'Informe a abordagem terapêutica.' })
+  @IsString({ message: 'Informe a abordagem terapêutica.' })
+  therapeuticApproach?: string;
+
+  /** Texto vazio apaga a biografia. */
+  @IsOptional()
+  @Transform(trim)
+  @MaxLength(2000, { message: 'A biografia pode ter até 2.000 caracteres.' })
+  @IsString()
+  biography?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' || value === undefined ? undefined : Number(value)))
+  @Max(100000, { message: 'Valor da sessão inválido.' })
+  @Min(0, { message: 'Valor da sessão inválido.' })
+  @IsNumber({}, { message: 'Valor da sessão inválido.' })
+  sessionFee?: number;
+
+  /** Link de contato (WhatsApp, site, agenda). Texto vazio apaga o link. */
+  @IsOptional()
+  @Transform(trim)
+  @Matches(/^$|^https?:\/\/\S+$/i, { message: 'Informe um link começando com http:// ou https://.' })
+  @MaxLength(500, { message: 'Link muito longo.' })
+  @IsString()
+  contactLink?: string;
 }
 
 export class UpdateAddressDto {

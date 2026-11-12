@@ -130,6 +130,15 @@
   border-color: var(--tint);
   box-shadow: var(--ring);
 }
+/* Multi-line field (e.g. the psychologist's biography) with the same floating label. */
+.field__textarea {
+  height: auto;
+  min-height: 132px;
+  padding-top: 28px;
+  line-height: 1.45;
+  font-size: var(--text-body);
+  resize: vertical;
+}
 .field__label {
   position: absolute;
   left: calc(var(--space-4) + 1px);
