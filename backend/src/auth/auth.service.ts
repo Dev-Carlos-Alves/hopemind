@@ -56,7 +56,9 @@ export class AuthService {
       await this.prisma.passwordReset.create({
         data: { userId: user.id, codeHash: await bcrypt.hash(code, 10), expiresAt: new Date(Date.now() + AuthService.RESET_TTL_MS) },
       });
-      await this.mail.send({
+      // Sent in the background: the answer comes back right away (and takes the same time
+      // whether or not the account exists). MailService.send never throws.
+      void this.mail.send({
         to: user.email,
         subject: 'HopeMind — código para redefinir sua senha',
         text:
