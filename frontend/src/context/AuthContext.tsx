@@ -18,7 +18,8 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (email: string, pass: string) => Promise<User>;
+  /** login = e-mail ou CPF; remember = "manter conectado" (sessão de 30 dias em vez de 7). */
+  login: (login: string, pass: string, remember?: boolean) => Promise<User>;
   registerUser: (data: RegisterPayload) => Promise<{ message: string; userId: number }>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -54,8 +55,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     refreshProfile();
   }, []);
 
-  const login = async (email: string, pass: string) => {
-    const res = await api.post('/auth/login', { email, password: pass });
+  const login = async (identifier: string, pass: string, remember = false) => {
+    const res = await api.post('/auth/login', { login: identifier.trim(), password: pass, remember });
     const u = res.data.user;
     setUser(u);
     return u;

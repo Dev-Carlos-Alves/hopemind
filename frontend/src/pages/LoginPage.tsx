@@ -9,6 +9,7 @@ import { getErrorMessage } from '../services/api';
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -20,10 +21,10 @@ export const LoginPage: React.FC = () => {
     setError('');
     setLoading(true);
     try {
-      const u = await login(email, password);
+      const u = await login(email, password, remember);
       navigate(u.hasTriage ? '/inicio' : u.userType === 'PSYCHOLOGIST' ? '/triagem' : '/matches');
     } catch (err) {
-      setError(getErrorMessage(err, 'Não foi possível entrar. Verifique suas credenciais.'));
+      setError(getErrorMessage(err, 'Não foi possível entrar. Verifique seus dados.'));
     } finally {
       setLoading(false);
     }
@@ -34,7 +35,7 @@ export const LoginPage: React.FC = () => {
       <form className="auth__form" onSubmit={handleSubmit} noValidate>
         <div>
           <h2 className="auth__title">Bem-vindo de volta</h2>
-          <p className="auth__subtitle">Entre com o e-mail e a senha da sua conta.</p>
+          <p className="auth__subtitle">Entre com o e-mail ou CPF e a senha da sua conta.</p>
         </div>
 
         {error && (
@@ -45,9 +46,9 @@ export const LoginPage: React.FC = () => {
         )}
 
         <TextField
-          label="E-mail"
-          type="email"
-          autoComplete="email"
+          label="E-mail ou CPF"
+          type="text"
+          autoComplete="username"
           inputMode="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -61,6 +62,16 @@ export const LoginPage: React.FC = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
+
+        <div className="row between auth__options">
+          <label className="checkbox">
+            <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+            <span>Manter conectado</span>
+          </label>
+          <Link to={`/esqueci-senha${email ? `?login=${encodeURIComponent(email)}` : ''}`} className="auth__link">
+            Esqueci minha senha
+          </Link>
+        </div>
 
         <Button type="submit" size="lg" block loading={loading} disabled={!email || !password}>
           Entrar

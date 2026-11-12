@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom';
 import { AddressCard } from '../components/AddressCard';
 import { BookablePsychologist, BookingSheet } from '../components/BookingSheet';
+import { PsychologistProfileSheet } from '../components/ProfileSheets';
 import { Icon } from '../components/Icon';
 import { QuestionnaireForm } from '../components/QuestionnaireForm';
 import { SafetyPanel } from '../components/SafetyPanel';
@@ -35,6 +36,12 @@ interface MatchItem {
     /** Link de contato informado pelo psicólogo (WhatsApp, site, agenda). */
     contactLink?: string | null;
     modalities: string[];
+    // Perfil detalhado (aberto ao clicar na foto ou no nome).
+    therapeuticApproach?: string | null;
+    experience?: string | null;
+    audiences?: string[];
+    demands?: string[];
+    experiencedWith?: string[];
     neighborhood: string | null;
     city: string | null;
   };
@@ -88,12 +95,13 @@ const toBookable = (m: MatchItem): BookablePsychologist => ({
   sessionFee: m.psychologist.sessionFee,
 });
 
-const MatchCard: React.FC<{ match: MatchItem; rank: number; index: number; onBook: () => void; onExplain: () => void }> = ({
+const MatchCard: React.FC<{ match: MatchItem; rank: number; index: number; onBook: () => void; onExplain: () => void; onProfile: () => void }> = ({
   match,
   rank,
   index,
   onBook,
   onExplain,
+  onProfile,
 }) => {
   const p = match.psychologist;
   const band = BAND[match.band];
@@ -101,15 +109,17 @@ const MatchCard: React.FC<{ match: MatchItem; rank: number; index: number; onBoo
   return (
     <article className="card card--lg match-card animate-rise" style={{ animationDelay: `${Math.min(index, 8) * 50}ms` }}>
       <div className="row gap-4" style={{ alignItems: 'flex-start' }}>
-        <Avatar name={p.name} size="lg" />
-        <div className="grow">
-          <h3 className="t-headline">{p.name}</h3>
-          <p className="t-footnote t-secondary">{p.specialty}</p>
-          <p className="t-caption t-tertiary">{p.crp}</p>
-          <div className="row gap-2 wrap" style={{ marginTop: 8 }}>
-            <span className={`pill pill--dot ${band.tone}`}>{band.label}</span>
+        <button type="button" className="person-button" onClick={onProfile} aria-label={`Ver perfil de ${p.name}`}>
+          <Avatar name={p.name} size="lg" />
+          <div className="grow">
+            <h3 className="t-headline">{p.name}</h3>
+            <p className="t-footnote t-secondary">{p.specialty}</p>
+            <p className="t-caption t-tertiary">{p.crp}</p>
+            <div className="row gap-2 wrap" style={{ marginTop: 8 }}>
+              <span className={`pill pill--dot ${band.tone}`}>{band.label}</span>
+            </div>
           </div>
-        </div>
+        </button>
         <span className="match-card__rank" aria-label={`${rank}º na sua lista`}>
           {rank}
         </span>
@@ -293,6 +303,7 @@ export const MatchesPage: React.FC = () => {
   const [query, setQuery] = useState('');
   const [booking, setBooking] = useState<BookablePsychologist | null>(null);
   const [explaining, setExplaining] = useState<MatchItem | null>(null);
+  const [profileOf, setProfileOf] = useState<MatchItem | null>(null);
   const [riskResult, setRiskResult] = useState<Safety | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -363,6 +374,7 @@ export const MatchesPage: React.FC = () => {
           index={i + offset}
           onBook={() => setBooking(toBookable(m))}
           onExplain={() => setExplaining(m)}
+          onProfile={() => setProfileOf(m)}
         />
       ))}
     </div>
@@ -538,6 +550,12 @@ export const MatchesPage: React.FC = () => {
 
       <BookingSheet key={booking?.id ?? 'none'} psychologist={booking} onClose={() => setBooking(null)} />
       <ExplainSheet match={explaining} algorithm={data?.algorithmVersion ?? ''} onClose={() => setExplaining(null)} />
+      <PsychologistProfileSheet
+        psychologist={profileOf?.psychologist ?? null}
+        distanceKm={profileOf?.distanceKm ?? null}
+        onBook={() => profileOf && setBooking(toBookable(profileOf))}
+        onClose={() => setProfileOf(null)}
+      />
     </>
   );
 };

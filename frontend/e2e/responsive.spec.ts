@@ -61,7 +61,7 @@ async function expectReadableBaseText(page: Page) {
   const sizes = await page.evaluate(() => {
     const px = (el: Element) => parseFloat(getComputedStyle(el).fontSize);
     const body = px(document.body);
-    const inputs = [...document.querySelectorAll('input, select, textarea')].filter((el) => (el as HTMLElement).offsetParent).map(px);
+    const inputs = [...document.querySelectorAll('input:not([type=checkbox]):not([type=radio]), select, textarea')].filter((el) => (el as HTMLElement).offsetParent).map(px);
     // Body copy only: footnotes, captions and field hints (13px/12px) are the design
     // system's secondary text — hints, metadata — and are not "texto base".
     const small = [...document.querySelectorAll('main p, form p')]
@@ -76,6 +76,8 @@ async function expectReadableBaseText(page: Page) {
 }
 
 async function expectTouchTargets(page: Page) {
+  // Entrance animations scale elements for a moment; measure only after they settle.
+  await page.evaluate(() => Promise.all(document.getAnimations().map((x) => x.finished.catch(() => undefined))));
   const small = await page.evaluate(() =>
     [...document.querySelectorAll('button, [role="button"], input[type="submit"], a.btn')]
       .filter((el) => (el as HTMLElement).offsetParent && getComputedStyle(el).visibility !== 'hidden')
@@ -93,6 +95,7 @@ async function expectTouchTargets(page: Page) {
 const PUBLIC = [
   { name: 'login', path: '/login', ready: 'button[type="submit"]' },
   { name: 'cadastro', path: '/registro', ready: 'button[type="submit"]' },
+  { name: 'esqueci minha senha', path: '/esqueci-senha', ready: 'button[type="submit"]' },
 ];
 const PRIVATE = [
   { name: 'início', path: '/inicio', ready: 'main' },

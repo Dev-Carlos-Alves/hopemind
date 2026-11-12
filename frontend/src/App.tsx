@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { AppointmentsPage } from './pages/AppointmentsPage';
 import { HomePage } from './pages/HomePage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { LoginPage } from './pages/LoginPage';
 import { MatchesPage } from './pages/MatchesPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -37,6 +38,7 @@ export const AppRoutes: React.FC = () => {
     <Routes>
       <Route path="/login" element={isAuthenticated ? <Navigate to="/inicio" replace /> : <LoginPage />} />
       <Route path="/registro" element={isAuthenticated ? <Navigate to="/inicio" replace /> : <RegisterPage />} />
+      <Route path="/esqueci-senha" element={isAuthenticated ? <Navigate to="/inicio" replace /> : <ForgotPasswordPage />} />
 
       <Route element={<ProtectedLayout />}>
         <Route path="/inicio" element={<HomePage />} />
