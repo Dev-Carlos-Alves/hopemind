@@ -1,9 +1,7 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import * as cookieParser from 'cookie-parser';
-import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { configureApp } from './app.setup';
 import { accessSecret, refreshSecret } from './auth/auth.config';
 
 async function bootstrap() {
@@ -13,29 +11,7 @@ async function bootstrap() {
   accessSecret();
   refreshSecret();
 
-  // Helmet Security Headers
-  app.use(helmet());
-
-  // Cookie Parser for httpOnly JWT
-  app.use(cookieParser());
-
-  // CORS Configuration
-  app.enableCors({
-    origin: process.env.CORS_ORIGIN
-      ? process.env.CORS_ORIGIN.split(',')
-      : ['http://localhost:5173', 'http://127.0.0.1:5173'],
-    credentials: true,
-  });
-
-  // Global DTO Validation Pipe
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      forbidNonWhitelisted: true,
-      stopAtFirstError: true,
-    }),
-  );
+  configureApp(app);
 
   // Swagger OpenAPI Documentation
   const config = new DocumentBuilder()

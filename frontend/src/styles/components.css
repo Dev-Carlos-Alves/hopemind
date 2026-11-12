@@ -167,11 +167,12 @@
 }
 .field__trailing {
   position: absolute;
-  right: var(--space-2);
+  right: var(--space-1);
   top: 50%;
   transform: translateY(-50%);
-  height: 40px;
-  width: 40px;
+  /* 44×44: minimum touch target (Plano de Teste, RNF-003). Fits inside the input's 52px right padding. */
+  height: 44px;
+  width: 44px;
   display: grid;
   place-items: center;
   border-radius: var(--radius-sm);
@@ -282,7 +283,8 @@
   font-weight: 600;
 }
 .segmented--lg .segmented__item {
-  height: 38px;
+  /* 44px: minimum touch target for the account-type choice on sign-up (RNF-003). */
+  height: 44px;
   font-size: var(--text-subhead);
 }
 

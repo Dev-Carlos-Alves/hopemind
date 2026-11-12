@@ -37,7 +37,8 @@ export const QuestionnaireForm: React.FC<Props> = ({ onSubmitted, className }) =
       .finally(() => setLoading(false));
   }, [toast]);
 
-  const sections = questionnaire?.sections ?? [];
+  // Memoized so `optionLabelsByCode` below is not rebuilt on every render.
+  const sections = useMemo(() => questionnaire?.sections ?? [], [questionnaire]);
   const section = sections[step];
   const isLast = step === sections.length - 1;
 
