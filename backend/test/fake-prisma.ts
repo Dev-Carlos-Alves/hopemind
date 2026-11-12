@@ -47,6 +47,14 @@ export class FakePrisma {
   matchRun = this.delegate('matchRun');
   appointment = this.delegate('appointment');
 
+  /** Simula a perda de conexão com o banco (health check do banco). */
+  databaseDown = false;
+
+  async $queryRaw(..._args: unknown[]) {
+    if (this.databaseDown) throw new Error("Can't reach database server");
+    return [{ '?column?': 1 }];
+  }
+
   async $connect() {}
   async $disconnect() {}
   async $transaction<T>(fn: (tx: this) => Promise<T>) {
@@ -54,6 +62,7 @@ export class FakePrisma {
   }
 
   reset() {
+    this.databaseDown = false;
     for (const k of Object.keys(this.tables) as (keyof Tables)[]) this.tables[k] = [];
     this.ids = {};
   }
