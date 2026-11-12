@@ -1,15 +1,34 @@
-import { Controller, Get, Redirect } from '@nestjs/common';
+import { Controller, Get, Redirect, ServiceUnavailableException } from '@nestjs/common';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
 import { Public } from './auth/decorators/public.decorator';
+import { PrismaService } from './prisma/prisma.service';
 
-/** Used by Render's health check and by anyone confirming the API is up. */
 @Controller('api/health')
 export class HealthController {
+  constructor(private prisma: PrismaService) {}
+
+  /** Used by Render's health check and by anyone confirming the API is up (does not touch the database). */
   @Public()
   @Get()
   @ApiExcludeEndpoint()
   check() {
     return { status: 'ok' };
+  }
+
+  /**
+   * Checks the database too. Called by the scheduled "keep-alive" workflow: the Supabase free
+   * plan pauses a project after a week without activity, which took the API down on 11/11/2026.
+   */
+  @Public()
+  @Get('db')
+  @ApiExcludeEndpoint()
+  async checkDatabase() {
+    try {
+      await this.prisma.$queryRaw`SELECT 1`;
+      return { status: 'ok', database: 'ok' };
+    } catch {
+      throw new ServiceUnavailableException({ status: 'error', database: 'unavailable' });
+    }
   }
 }
 

@@ -26,6 +26,17 @@ describe('API — autenticação, segurança e escopo (integração HTTP)', () =
       await t.http().get('/api/health').expect(200, { status: 'ok' });
     });
 
+    it('GET /api/health/db confirma o banco (usado pelo keep-alive do Supabase)', async () => {
+      await t.http().get('/api/health/db').expect(200, { status: 'ok', database: 'ok' });
+    });
+
+    it('GET /api/health/db responde 503 quando o banco está fora do ar', async () => {
+      t.prisma.databaseDown = true;
+      const res = await t.http().get('/api/health/db').expect(503);
+      expect(res.body).toMatchObject({ status: 'error', database: 'unavailable' });
+      await t.http().get('/api/health').expect(200);
+    });
+
     it('a raiz redireciona para a documentação Swagger', async () => {
       const res = await t.http().get('/').expect(302);
       expect(res.headers.location).toBe('/api/docs');

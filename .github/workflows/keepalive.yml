@@ -1,0 +1,22 @@
+# Mantém o banco ativo (Status Report, seção 8). O plano gratuito do Supabase pausa o projeto
+# depois de uma semana sem atividade — foi o que derrubou a API em 11/11/2026. A cada 3 dias,
+# este workflow acorda a API no Render e faz uma consulta ao banco por GET /api/health/db.
+name: Keep-alive (API + banco)
+
+on:
+  schedule:
+    - cron: '0 12 */3 * *' # 09:00 em Brasília, a cada 3 dias
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: GET /api/health/db
+        run: |
+          for i in $(seq 1 10); do
+            body=$(curl -fsS --max-time 60 https://hopemind-api.onrender.com/api/health/db) && echo "$body" | grep -q '"database":"ok"' && { echo "API e banco ativos: $body"; exit 0; }
+            echo "Tentativa $i falhou (a API pode estar acordando); aguardando 20 s..."; sleep 20
+          done
+          echo "::error::A API ou o banco não responderam. Verifique o Supabase (projeto pausado?) e o Render." >&2
+          exit 1
