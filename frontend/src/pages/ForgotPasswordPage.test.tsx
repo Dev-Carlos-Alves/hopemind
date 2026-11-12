@@ -20,7 +20,9 @@ const renderPage = (url = '/esqueci-senha?login=529.982.247-25') =>
   );
 
 describe('Esqueci minha senha (web)', () => {
-  beforeEach(() => vi.restoreAllMocks());
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
 
   it('pede o código pelo e-mail ou CPF e redefine a senha com ele', async () => {
     const post = vi.spyOn(api, 'post').mockImplementation(async (url: string) =>
