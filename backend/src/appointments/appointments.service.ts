@@ -1,5 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ageAt } from '../triage/match/match-engine';
+import { answerLabels, Answers, PATIENT_QUESTIONNAIRE } from '../triage/questionnaire';
 
 const SESSION_MINUTES = 50;
 
@@ -75,12 +77,28 @@ export class AppointmentsService {
     const appointments = await this.prisma.appointment.findMany({
       where: whereClause,
       include: {
-        psychologist: { include: { user: { select: { name: true, email: true, phone: true } } } },
-        patient: { include: { user: { select: { name: true, email: true, phone: true } } } },
+        psychologist: { include: { user: { select: { name: true, email: true, phone: true, neighborhood: true, city: true } } } },
+        patient: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+                phone: true,
+                birthDate: true,
+                gender: true,
+                neighborhood: true,
+                city: true,
+                triageSubmissions: { orderBy: { createdAt: 'desc' }, take: 1, select: { answers: true } },
+              },
+            },
+          },
+        },
       },
       orderBy: { appointmentDate: 'asc' },
     });
 
+    const viewerIsPsychologist = !!user.psychologist;
     return appointments.map((a) => ({
       id: a.id,
       dataHora: a.appointmentDate,
@@ -89,6 +107,51 @@ export class AppointmentsService {
       pacienteNome: a.patient.user.name,
       especialidade: a.psychologist.specialty,
       crp: a.psychologist.crp,
+      // Detailed profile of the other person, opened by tapping the name. Each side only sees
+      // the people it has a session with (the list is already filtered by the logged-in user).
+      ...(viewerIsPsychologist ? { paciente: this.patientProfile(a.patient) } : { psicologo: this.psychologistProfile(a.psychologist) }),
     }));
+  }
+
+  private patientProfile(p: {
+    mainComplaint: string | null;
+    user: { name: string; birthDate: Date; gender: string; neighborhood: string | null; city: string | null; triageSubmissions: { answers: unknown }[] };
+  }) {
+    const answers = (p.user.triageSubmissions[0]?.answers ?? null) as Answers | null;
+    return {
+      nome: p.user.name,
+      idade: ageAt(p.user.birthDate),
+      genero: p.user.gender,
+      sobre: p.mainComplaint,
+      prioridades: answerLabels(PATIENT_QUESTIONNAIRE, answers, 'P01'),
+      outrosTemas: answerLabels(PATIENT_QUESTIONNAIRE, answers, 'P19'),
+      modalidade: answerLabels(PATIENT_QUESTIONNAIRE, answers, 'P20')[0] ?? null,
+      bairro: p.user.neighborhood,
+      cidade: p.user.city,
+    };
+  }
+
+  private psychologistProfile(p: {
+    id: number;
+    crp: string;
+    specialty: string;
+    therapeuticApproach: string;
+    biography: string | null;
+    sessionFee: unknown;
+    contactLink: string | null;
+    user: { name: string; neighborhood: string | null; city: string | null };
+  }) {
+    return {
+      id: p.id,
+      nome: p.user.name,
+      crp: p.crp,
+      especialidade: p.specialty,
+      abordagem: p.therapeuticApproach,
+      biografia: p.biography,
+      valorSessao: p.sessionFee,
+      contato: p.contactLink,
+      bairro: p.user.neighborhood,
+      cidade: p.user.city,
+    };
   }
 }

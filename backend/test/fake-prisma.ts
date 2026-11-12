@@ -6,7 +6,7 @@
  */
 
 type Row = Record<string, any>;
-type Tables = Record<'user' | 'patient' | 'psychologist' | 'triageSubmission' | 'safetyAlert' | 'matchRun' | 'appointment', Row[]>;
+type Tables = Record<'user' | 'patient' | 'psychologist' | 'triageSubmission' | 'safetyAlert' | 'matchRun' | 'appointment' | 'passwordReset', Row[]>;
 
 const RELATIONS: Record<string, Record<string, { model: keyof Tables; local: string; foreign: string; many?: boolean }>> = {
   user: {
@@ -30,12 +30,13 @@ const DEFAULTS: Record<string, () => Row> = {
   safetyAlert: () => ({ status: 'OPEN', resolvedAt: null }),
   matchRun: () => ({}),
   appointment: () => ({ status: 'SCHEDULED' }),
+  passwordReset: () => ({ attempts: 0, usedAt: null }),
 };
 
 const clone = <T>(v: T): T => (v instanceof Date ? (new Date(v) as T) : v && typeof v === 'object' ? structuredClone(v) : v);
 
 export class FakePrisma {
-  tables: Tables = { user: [], patient: [], psychologist: [], triageSubmission: [], safetyAlert: [], matchRun: [], appointment: [] };
+  tables: Tables = { user: [], patient: [], psychologist: [], triageSubmission: [], safetyAlert: [], matchRun: [], appointment: [], passwordReset: [] };
   private ids: Record<string, number> = {};
   private clock = 0;
 
@@ -46,6 +47,7 @@ export class FakePrisma {
   safetyAlert = this.delegate('safetyAlert');
   matchRun = this.delegate('matchRun');
   appointment = this.delegate('appointment');
+  passwordReset = this.delegate('passwordReset');
 
   /** Simula a perda de conexão com o banco (health check do banco). */
   databaseDown = false;
@@ -145,6 +147,11 @@ export class FakePrisma {
       findMany: async (args: Row = {}) => find(args).map((r) => this.project(model, r, args)),
       count: async (args: Row = {}) => find(args).length,
       create: async (args: Row) => this.project(model, this.insert(model, args.data), args),
+      updateMany: async (args: Row) => {
+        const rows = find(args);
+        rows.forEach((row) => Object.assign(row, clone(args.data)));
+        return { count: rows.length };
+      },
       update: async (args: Row) => {
         const row = find(args)[0];
         if (!row) throw new Error(`${model} não encontrado`);

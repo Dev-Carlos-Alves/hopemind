@@ -21,6 +21,15 @@ export function isVisible(question: QuestionDef, answers: Answers): boolean {
   return true;
 }
 
+/** Human-readable labels of a single/multi answer, from the question's own options (used in profiles). */
+export function answerLabels(q: Questionnaire, answers: Answers | null | undefined, code: string): string[] {
+  const question = allQuestions(q).find((x) => x.code === code);
+  const raw = answers?.[code];
+  if (!question || raw == null) return [];
+  const values = Array.isArray(raw) ? raw.map(String) : typeof raw === 'string' ? [raw] : [];
+  return values.map((v) => question.options?.find((o) => o.value === v)?.label ?? v);
+}
+
 export class AnswerValidationError extends Error {}
 
 const isEmpty = (v: unknown) =>

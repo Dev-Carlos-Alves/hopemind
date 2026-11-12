@@ -3,7 +3,15 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ALGORITHM_VERSION, findMatches, PsychologistProfile } from './match/match-engine';
 import { evaluateSafety, SUPPORT_RESOURCES } from './match/safety';
-import { AnswerValidationError, Answers, Audience, questionnaireFor, sanitizeAnswers } from './questionnaire';
+import {
+  AnswerValidationError,
+  answerLabels,
+  Answers,
+  Audience,
+  PSYCHOLOGIST_QUESTIONNAIRE,
+  questionnaireFor,
+  sanitizeAnswers,
+} from './questionnaire';
 import { APPROACHES, labelOf } from './questionnaire/catalog';
 
 const LOCATION_FIELDS = { city: true, neighborhood: true, latitude: true, longitude: true } as const;
@@ -161,6 +169,13 @@ export class TriageService {
             modalities: (psyAnswers.S14 as string[]) ?? [],
             neighborhood: p.user.neighborhood,
             city: p.user.city,
+            // Detailed profile (opened by tapping the photo or name).
+            therapeuticApproach: p.therapeuticApproach,
+            gender: p.user.gender,
+            experience: answerLabels(PSYCHOLOGIST_QUESTIONNAIRE, psyAnswers, 'S01')[0] ?? null,
+            audiences: answerLabels(PSYCHOLOGIST_QUESTIONNAIRE, psyAnswers, 'S02'),
+            demands: answerLabels(PSYCHOLOGIST_QUESTIONNAIRE, psyAnswers, 'S03'),
+            experiencedWith: answerLabels(PSYCHOLOGIST_QUESTIONNAIRE, psyAnswers, 'S17'),
           },
         };
       }),
