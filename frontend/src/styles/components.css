@@ -1202,3 +1202,92 @@
   font-size: var(--text-caption);
   color: var(--label-3);
 }
+
+/* ───────────── Perfis detalhados ───────────── */
+.profile-sheet__label {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.profile-sheet__header {
+  align-items: center;
+}
+/* Foto e nome clicáveis (abrem o perfil) sem perder a aparência do card. */
+.person-button {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+}
+.person-button:hover .t-headline {
+  color: var(--tint);
+}
+.person-button:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.appointment-row--button {
+  width: 100%;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.appointment-row--button:hover {
+  background: var(--fill-soft);
+}
+
+/* ───────────── Login: manter conectado e recuperação de senha ───────────── */
+.auth__options {
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  font-size: var(--text-subhead);
+  color: var(--label);
+  cursor: pointer;
+}
+.checkbox input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--tint);
+  cursor: pointer;
+}
+.auth__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-subhead);
+  font-weight: 600;
+  color: var(--tint);
+  cursor: pointer;
+}
+.auth__link:hover {
+  text-decoration: underline;
+}
+.auth__resend {
+  align-self: center;
+}
+.auth__resend:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

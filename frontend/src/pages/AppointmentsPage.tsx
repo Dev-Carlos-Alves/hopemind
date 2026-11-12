@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { PatientCard, PatientProfileSheet, PsychologistCard, PsychologistCardSheet } from '../components/ProfileSheets';
 import { Avatar, EmptyState, PageHeader, Segmented, Skeleton } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -13,6 +14,10 @@ interface AppointmentItem {
   pacienteNome: string;
   especialidade: string;
   crp: string;
+  /** Perfil do paciente — só vem para o psicólogo da sessão. */
+  paciente?: PatientCard;
+  /** Perfil do psicólogo — só vem para o paciente da sessão. */
+  psicologo?: PsychologistCard;
 }
 
 const STATUS: Record<AppointmentItem['status'], { label: string; tone: string }> = {
@@ -47,6 +52,7 @@ export const AppointmentsPage: React.FC = () => {
   const [items, setItems] = useState<AppointmentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>('upcoming');
+  const [selected, setSelected] = useState<AppointmentItem | null>(null);
 
   useEffect(() => {
     api
@@ -146,8 +152,17 @@ export const AppointmentsPage: React.FC = () => {
               {list.map((item) => {
                 const other = isPsychologist ? item.pacienteNome : item.psicologoNome;
                 const status = STATUS[item.status] ?? STATUS.SCHEDULED;
+                const hasProfile = !!(item.paciente || item.psicologo);
                 return (
-                  <div key={item.id} className="list-row appointment-row" style={{ '--row-inset': '92px' } as React.CSSProperties}>
+                  <button
+                    type="button"
+                    key={item.id}
+                    className="list-row appointment-row appointment-row--button"
+                    style={{ '--row-inset': '92px' } as React.CSSProperties}
+                    onClick={() => hasProfile && setSelected(item)}
+                    disabled={!hasProfile}
+                    aria-label={`Ver perfil de ${other}`}
+                  >
                     <div className="appointment-row__time">{timeFmt.format(new Date(item.dataHora))}</div>
                     <Avatar name={other} />
                     <div className="grow">
@@ -157,13 +172,16 @@ export const AppointmentsPage: React.FC = () => {
                       </p>
                     </div>
                     <span className={`pill ${status.tone}`}>{status.label}</span>
-                  </div>
+                  </button>
                 );
               })}
             </div>
           </section>
         ))
       )}
+
+      <PatientProfileSheet patient={selected?.paciente ?? null} onClose={() => setSelected(null)} />
+      <PsychologistCardSheet psychologist={selected?.psicologo ?? null} onClose={() => setSelected(null)} />
     </>
   );
 };
